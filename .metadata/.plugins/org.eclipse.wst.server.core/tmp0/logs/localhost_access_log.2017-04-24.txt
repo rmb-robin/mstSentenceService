@@ -26,3 +26,4 @@
 127.0.0.1 - - [24/Apr/2017:12:39:32 -0500] "GET / HTTP/1.1" 404 951
 0:0:0:0:0:0:0:1 - - [24/Apr/2017:12:39:37 -0500] "GET /mst-sentence-service/webapi/myresource/ HTTP/1.1" 200 7
 0:0:0:0:0:0:0:1 - - [24/Apr/2017:12:39:58 -0500] "GET /mst-sentence-service/webapi/sentence/ HTTP/1.1" 200 16122
+0:0:0:0:0:0:0:1 - - [24/Apr/2017:14:02:30 -0500] "GET /mst-sentence-service/webapi/sentence/processingdata HTTP/1.1" 200 21651

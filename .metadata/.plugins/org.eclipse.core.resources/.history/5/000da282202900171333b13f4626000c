@@ -41,7 +41,11 @@ public class SentenceController {
     @GET
     @Path("processingdata")
     public Response getProcessingData(){
-    	SentenceProcessingMetaDataInput input = new SentenceProcessingDbMetaDataInputFactory().create();
+    	
+    	SentenceProcessingMetaDataInput input = new SentenceProcessingDbMetaDataInputFactory().create()
     	return Response.status(200).entity(input).build();
+    
     }
+    
+    
 }

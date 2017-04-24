@@ -9,7 +9,6 @@ import javax.ws.rs.core.Response;
 import com.mst.interfaces.SentenceProcessingController;
 import com.mst.model.sentenceProcessing.Sentence;
 import com.mst.model.sentenceProcessing.SentenceDb;
-import com.mst.model.sentenceProcessing.SentenceProcessingMetaDataInput;
 import com.mst.sentenceprocessing.SentenceProcessingControllerImpl;
 import com.mst.services.SentenceProcessingDbMetaDataInputFactory;
 import com.mst.services.SentenceService;
@@ -41,7 +40,9 @@ public class SentenceController {
     @GET
     @Path("processingdata")
     public Response getProcessingData(){
-    	SentenceProcessingMetaDataInput input = new SentenceProcessingDbMetaDataInputFactory().create();
-    	return Response.status(200).entity(input).build();
+    	
+    	 new SentenceProcessingDbMetaDataInputFactory().create()
     }
+    
+    
 }
