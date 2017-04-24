@@ -1,0 +1,5 @@
+INDEX VERSION 1.3+C:\Users\user1\Documents\mstSentenceService\mstSentenceService\.metadata\.plugins\org.eclipse.wst.jsdt.core\indexes
+1593349044.index
+1341344639.index
+1885330286.index
+2604099325.index
