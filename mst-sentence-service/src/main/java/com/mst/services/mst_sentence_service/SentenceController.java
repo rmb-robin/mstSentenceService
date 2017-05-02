@@ -8,10 +8,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 import com.mst.model.SentenceQuery.SentenceQueryInput;
 import com.mst.model.SentenceQuery.SentenceQueryResult;
+import com.mst.model.requests.SentenceRequest;
+import com.mst.model.requests.SentenceTextRequest;
 import com.mst.model.sentenceProcessing.Sentence;
 import com.mst.model.sentenceProcessing.SentenceDb;
 import com.mst.model.sentenceProcessing.SentenceProcessingMetaDataInput;
-import com.mst.model.sentenceProcessing.TextInput;
 import com.mst.sentenceprocessing.interfaces.SentenceService;
 import com.mst.sentenceprocessing.services.SentenceServiceImpl;
 
@@ -30,7 +31,7 @@ public class SentenceController {
 	public Response saveSentence(SentenceRequest request) throws Exception{
     	try{
 	    	List<Sentence> sentences = sentenceService.createSentences(request);
-	    	sentenceService.saveSentences(sentences);
+	    	sentenceService.saveSentences(sentences, request.getDiscreteData());
 		return Response.status(200).entity("sentences Saved successfully").build();
     	}
     	catch(Exception ex){
@@ -40,10 +41,10 @@ public class SentenceController {
     
     @POST
     @Path("/savetext")
-    public Response saveText(TextInput input){
+    public Response saveText(SentenceTextRequest sentenceTextRequest){
     	try{
-	    	List<Sentence> sentences = sentenceService.createSentences(input);
-	    	sentenceService.saveSentences(sentences);
+	    	List<Sentence> sentences = sentenceService.createSentences(sentenceTextRequest);
+	    	sentenceService.saveSentences(sentences, sentenceTextRequest.getDiscreteData());
 	    	return Response.status(200).entity("sentences Saved successfully").build();
     	}
     	catch(Exception ex){
