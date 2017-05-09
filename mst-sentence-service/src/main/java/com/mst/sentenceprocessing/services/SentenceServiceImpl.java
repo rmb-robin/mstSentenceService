@@ -11,9 +11,9 @@ import com.mst.interfaces.dao.SentenceDao;
 import com.mst.interfaces.dao.SentenceQueryDao;
 import com.mst.model.SentenceQuery.SentenceQueryInput;
 import com.mst.model.SentenceQuery.SentenceQueryResult;
+import com.mst.model.discrete.DiscreteData;
 import com.mst.model.requests.SentenceRequest;
 import com.mst.model.requests.SentenceTextRequest;
-import com.mst.model.sentenceProcessing.DiscreteData;
 import com.mst.model.sentenceProcessing.Sentence;
 import com.mst.model.sentenceProcessing.SentenceDb;
 import com.mst.model.sentenceProcessing.SentenceProcessingMetaDataInput;
@@ -31,6 +31,7 @@ public class SentenceServiceImpl implements SentenceService {
 	private SentenceProcessingMetaDataInputFactory sentenceProcessingDbMetaDataInputFactory;
 	private SentenceProcessingController controller; 
 	
+	
 	public SentenceServiceImpl(){
 		mongoProvider = new SentenceServiceMongoDatastoreProvider();
 		sentenceQueryDao = new SentenceQueryDaoImpl();
@@ -39,6 +40,7 @@ public class SentenceServiceImpl implements SentenceService {
 		sentenceDao.setMongoDatastoreProvider(mongoProvider);
 		sentenceProcessingDbMetaDataInputFactory = new SentenceProcessingDbMetaDataInputFactory(mongoProvider);
 		controller = new SentenceProcessingControllerImpl();
+
 	}
 	
 	public List<SentenceQueryResult> querySentences(SentenceQueryInput input){
@@ -66,5 +68,4 @@ public class SentenceServiceImpl implements SentenceService {
 		controller.setMetadata(sentenceProcessingDbMetaDataInputFactory.create());
 		return controller.processText(request);
 	}
-
 }

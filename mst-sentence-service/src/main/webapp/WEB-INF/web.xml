@@ -9,6 +9,12 @@
             <param-name>jersey.config.server.provider.packages</param-name>
             <param-value>com.mst.services.mst_sentence_service</param-value>
         </init-param>
+                 <init-param>
+            <param-name>jersey.config.server.provider.classnames</param-name>
+            <param-value>org.glassfish.jersey.jackson.JacksonFeature</param-value>
+        </init-param>
+        
+        
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet-mapping>

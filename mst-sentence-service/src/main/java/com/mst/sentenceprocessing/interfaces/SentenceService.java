@@ -3,9 +3,10 @@ package com.mst.sentenceprocessing.interfaces;
 import java.util.List;
 import com.mst.model.SentenceQuery.SentenceQueryInput;
 import com.mst.model.SentenceQuery.SentenceQueryResult;
+import com.mst.model.discrete.DiscreteData;
+import com.mst.model.requests.RejectedReport;
 import com.mst.model.requests.SentenceRequest;
 import com.mst.model.requests.SentenceTextRequest;
-import com.mst.model.sentenceProcessing.DiscreteData;
 import com.mst.model.sentenceProcessing.Sentence;
 import com.mst.model.sentenceProcessing.SentenceProcessingMetaDataInput;
 
