@@ -17,4 +17,5 @@ public interface SentenceService {
 	List<Sentence> createSentences(SentenceRequest request) throws Exception;
 	List<Sentence> createSentences(SentenceTextRequest request) throws Exception;
 	SentenceProcessingMetaDataInput getSentenceProcessingMetadata();
+	List<String> getEdgeNamesForTokens(List<String> tokens);
 }

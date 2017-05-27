@@ -32,13 +32,24 @@ public class SentenceController {
 	}
 	
 	
+	@POST
+	@Path("/getedgesfortokens")
+	public Response getEdgeNamesForTokens(List<String> tokens){
+		try{
+			List<String> edges = sentenceService.getEdgeNamesForTokens(tokens);
+			return Response.status(200).entity(edges).build();
+		}
+		catch(Exception ex){
+    		return Response.status(500).entity(ex.getMessage()).build();
+    	}
+	}
+	
     @POST
 	@Path("/save")
 	public Response saveSentence(SentenceRequest request) throws Exception{
     	try{
 	    	List<Sentence> sentences = sentenceService.createSentences(request);
-	    	DiscreteData discreteDate = new DiscreteDataNormalizerImpl().process(request.getDiscreteData());
-	    	sentenceService.saveSentences(sentences, discreteDate);
+	    	sentenceService.saveSentences(sentences, request.getDiscreteData());
 		return Response.status(200).entity("sentences Saved successfully").build();
     	}
     	catch(Exception ex){
@@ -51,8 +62,7 @@ public class SentenceController {
     public Response saveText(SentenceTextRequest sentenceTextRequest){
     	try{
 	    	List<Sentence> sentences = sentenceService.createSentences(sentenceTextRequest);
-	    	DiscreteData discreteDate = new DiscreteDataNormalizerImpl().process(sentenceTextRequest.getDiscreteData());
-	    	sentenceService.saveSentences(sentences, discreteDate);
+	    	sentenceService.saveSentences(sentences, sentenceTextRequest.getDiscreteData());
 	    	return Response.status(200).entity("sentences Saved successfully").build();
     	}
     	catch(Exception ex){
