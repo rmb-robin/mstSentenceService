@@ -37,7 +37,7 @@ public class ReportsServiceImpl implements ReportsService {
 	}
 	
 	public void saveRejectedReport(RejectedReport rejectedReport) {
-		//rejectedReport.setTimeStamps();
+		rejectedReport.setTimeStamps();
 		rejectedReportDao.save(rejectedReport);
 	}
 
