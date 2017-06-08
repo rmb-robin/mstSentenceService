@@ -20,7 +20,7 @@ import com.mst.model.sentenceProcessing.SentenceProcessingMetaDataInput;
 import com.mst.sentenceprocessing.DiscreteDataNormalizerImpl;
 import com.mst.sentenceprocessing.interfaces.SentenceService;
 import com.mst.sentenceprocessing.services.SentenceServiceImpl;
-
+import org.apache.log4j.Logger;
 
 @Path("sentence")
 public class SentenceController {
@@ -49,6 +49,8 @@ public class SentenceController {
 	public Response saveSentence(SentenceRequest request) throws Exception{
     	try{
 	    	List<Sentence> sentences = sentenceService.createSentences(request);
+	  // 		Logger logger = Logger.getLogger(SentenceController.class);
+	    //    logger.error("Saving Sentences");
 	    	sentenceService.saveSentences(sentences, request.getDiscreteData());
 		return Response.status(200).entity("sentences Saved successfully").build();
     	}
@@ -63,6 +65,8 @@ public class SentenceController {
     	try{
 	    	List<Sentence> sentences = sentenceService.createSentences(sentenceTextRequest);
 	    	sentenceService.saveSentences(sentences, sentenceTextRequest.getDiscreteData());
+	   //		Logger logger = Logger.getLogger(SentenceController.class);
+	  //      logger.error("Saving Sentences");
 	    	return Response.status(200).entity("sentences Saved successfully").build();
     	}
     	catch(Exception ex){
