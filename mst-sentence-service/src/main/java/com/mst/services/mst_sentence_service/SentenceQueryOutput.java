@@ -8,6 +8,15 @@ import com.mst.model.sentenceProcessing.SentenceDb;
 public class SentenceQueryOutput {
 
 	private List<SentenceQueryResult> queryResults;
+	private int size; 
+	
+	public int getSize() {
+		return size;
+	}
+
+	public void setSize(int size) {
+		this.size = size;
+	}
 
 	public List<SentenceQueryResult> getSentenceQueryResults() {
 		return queryResults;

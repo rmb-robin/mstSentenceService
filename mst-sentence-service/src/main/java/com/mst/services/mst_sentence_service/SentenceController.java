@@ -81,6 +81,7 @@ public class SentenceController {
 	    	List<SentenceQueryResult> queryResults = sentenceService.querySentences(input);
 	    	SentenceQueryOutput result = new SentenceQueryOutput();
 	    	result.setSentenceQueryResults(queryResults);
+	    	result.setSize(queryResults.size());
     	return Response.status(200).entity(result).build(); 
     	}
     	catch(Exception ex){
