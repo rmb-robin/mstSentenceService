@@ -68,8 +68,10 @@ public class SentenceServiceImpl implements SentenceService {
 		}
 		
 		discreteData = discreteDataNormalizer.process(discreteData);
-		DisceteDataComplianceDisplayFields fields = complianceDisplayFieldsDao.getbyOrgname(discreteData.getOrganizationName());
-		discreteData.setBucketName(bucketIdentifier.getBucket(discreteData, sentences, fields));
+		if(discreteData.getOrganizationId()!=null){
+			DisceteDataComplianceDisplayFields fields = complianceDisplayFieldsDao.getbyOrgname(discreteData.getOrganizationId());
+			discreteData.setBucketName(bucketIdentifier.getBucket(discreteData, sentences, fields));
+		}
 		sentenceDao.saveSentences(documents, discreteData);
 	}
 	
