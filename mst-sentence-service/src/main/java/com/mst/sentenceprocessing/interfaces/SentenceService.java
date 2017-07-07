@@ -8,14 +8,16 @@ import com.mst.model.requests.RejectedReport;
 import com.mst.model.requests.SentenceRequest;
 import com.mst.model.requests.SentenceTextRequest;
 import com.mst.model.sentenceProcessing.Sentence;
+import com.mst.model.sentenceProcessing.SentenceProcessingFailures;
 import com.mst.model.sentenceProcessing.SentenceProcessingMetaDataInput;
+import com.mst.model.sentenceProcessing.SentenceProcessingResult;
 
 
 public interface SentenceService {
 	List<SentenceQueryResult> querySentences(SentenceQueryInput input);
-	void saveSentences(List<Sentence> sentences,DiscreteData discreteData);
+	void saveSentences(List<Sentence> sentences,DiscreteData discreteData, SentenceProcessingFailures failures);
 	List<Sentence> createSentences(SentenceRequest request) throws Exception;
-	List<Sentence> createSentences(SentenceTextRequest request) throws Exception;
+	SentenceProcessingResult createSentences(SentenceTextRequest request) throws Exception;
 	SentenceProcessingMetaDataInput getSentenceProcessingMetadata();
 	List<String> getEdgeNamesForTokens(List<String> tokens);
 }

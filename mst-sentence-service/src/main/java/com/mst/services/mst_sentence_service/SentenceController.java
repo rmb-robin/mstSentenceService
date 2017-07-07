@@ -17,6 +17,7 @@ import com.mst.model.requests.SentenceTextRequest;
 import com.mst.model.sentenceProcessing.Sentence;
 import com.mst.model.sentenceProcessing.SentenceDb;
 import com.mst.model.sentenceProcessing.SentenceProcessingMetaDataInput;
+import com.mst.model.sentenceProcessing.SentenceProcessingResult;
 import com.mst.sentenceprocessing.DiscreteDataNormalizerImpl;
 import com.mst.sentenceprocessing.interfaces.SentenceService;
 import com.mst.sentenceprocessing.services.SentenceServiceImpl;
@@ -49,9 +50,7 @@ public class SentenceController {
 	public Response saveSentence(SentenceRequest request) throws Exception{
     	try{
 	    	List<Sentence> sentences = sentenceService.createSentences(request);
-	  // 		Logger logger = Logger.getLogger(SentenceController.class);
-	    //    logger.error("Saving Sentences");
-	    	sentenceService.saveSentences(sentences, request.getDiscreteData());
+	    	sentenceService.saveSentences(sentences, request.getDiscreteData(),null);
 		return Response.status(200).entity("sentences Saved successfully").build();
     	}
     	catch(Exception ex){
@@ -63,10 +62,8 @@ public class SentenceController {
     @Path("/savetext")
     public Response saveText(SentenceTextRequest sentenceTextRequest){
     	try{
-	    	List<Sentence> sentences = sentenceService.createSentences(sentenceTextRequest);
-	    	sentenceService.saveSentences(sentences, sentenceTextRequest.getDiscreteData());
-	   //		Logger logger = Logger.getLogger(SentenceController.class);
-	  //      logger.error("Saving Sentences");
+    		SentenceProcessingResult result = sentenceService.createSentences(sentenceTextRequest);
+	    	sentenceService.saveSentences(result.getSentences(), sentenceTextRequest.getDiscreteData(),result.getFailures());
 	    	return Response.status(200).entity("sentences Saved successfully").build();
     	}
     	catch(Exception ex){

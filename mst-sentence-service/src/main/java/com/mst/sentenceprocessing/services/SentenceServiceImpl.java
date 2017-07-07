@@ -22,7 +22,9 @@ import com.mst.model.requests.SentenceRequest;
 import com.mst.model.requests.SentenceTextRequest;
 import com.mst.model.sentenceProcessing.Sentence;
 import com.mst.model.sentenceProcessing.SentenceDb;
+import com.mst.model.sentenceProcessing.SentenceProcessingFailures;
 import com.mst.model.sentenceProcessing.SentenceProcessingMetaDataInput;
+import com.mst.model.sentenceProcessing.SentenceProcessingResult;
 import com.mst.sentenceprocessing.DiscreteDataBucketIdentifierImpl;
 import com.mst.sentenceprocessing.DiscreteDataNormalizerImpl;
 import com.mst.sentenceprocessing.SentenceConverter;
@@ -61,7 +63,7 @@ public class SentenceServiceImpl implements SentenceService {
 		return sentenceQueryDao.getSentences(input);
 	}
 
-	public void saveSentences(List<Sentence> sentences, DiscreteData discreteData){
+	public void saveSentences(List<Sentence> sentences, DiscreteData discreteData, SentenceProcessingFailures sentenceProcessingFailures){
 		List<SentenceDb> documents = new ArrayList<SentenceDb>();
 		for(Sentence sentence: sentences){
 			documents.add(SentenceConverter.convertToDocument(sentence));
@@ -70,9 +72,10 @@ public class SentenceServiceImpl implements SentenceService {
 		discreteData = discreteDataNormalizer.process(discreteData);
 		if(discreteData.getOrganizationId()!=null){
 			DisceteDataComplianceDisplayFields fields = complianceDisplayFieldsDao.getbyOrgname(discreteData.getOrganizationId());
-			discreteData.setBucketName(bucketIdentifier.getBucket(discreteData, sentences, fields));
+			if(fields!=null)
+				discreteData.setBucketName(bucketIdentifier.getBucket(discreteData, sentences, fields));
 		}
-		sentenceDao.saveSentences(documents, discreteData);
+		sentenceDao.saveSentences(documents, discreteData,sentenceProcessingFailures);
 	}
 	
 	public List<Sentence> createSentences(SentenceRequest request) throws Exception{
@@ -84,7 +87,7 @@ public class SentenceServiceImpl implements SentenceService {
 		return sentenceProcessingDbMetaDataInputFactory.create();
 	}
 
-	public List<Sentence> createSentences(SentenceTextRequest request) throws Exception {
+	public SentenceProcessingResult createSentences(SentenceTextRequest request) throws Exception {
 		controller.setMetadata(sentenceProcessingDbMetaDataInputFactory.create());
 		return controller.processText(request);
 	}
