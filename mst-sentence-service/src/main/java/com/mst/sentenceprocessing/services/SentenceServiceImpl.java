@@ -2,7 +2,6 @@ package com.mst.sentenceprocessing.services;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import com.mst.dao.DisceteDataComplianceDisplayFieldsDaoImpl;
 import com.mst.dao.SentenceDaoImpl;
 import com.mst.dao.SentenceQueryDaoImpl;
@@ -18,6 +17,7 @@ import com.mst.model.SentenceQuery.SentenceQueryInput;
 import com.mst.model.SentenceQuery.SentenceQueryResult;
 import com.mst.model.discrete.DisceteDataComplianceDisplayFields;
 import com.mst.model.discrete.DiscreteData;
+import com.mst.model.discrete.DiscreteDataBucketIdentifierResult;
 import com.mst.model.requests.SentenceRequest;
 import com.mst.model.requests.SentenceTextRequest;
 import com.mst.model.sentenceProcessing.Sentence;
@@ -59,7 +59,9 @@ public class SentenceServiceImpl implements SentenceService {
 		complianceDisplayFieldsDao.setMongoDatastoreProvider(mongoProvider);
 	}
 	
-	public List<SentenceQueryResult> querySentences(SentenceQueryInput input){
+	public List<SentenceQueryResult> querySentences(SentenceQueryInput input) throws Exception{
+		if(input.getOrganizationId()==null)
+			throw new Exception("Missing OrgId");
 		return sentenceQueryDao.getSentences(input);
 	}
 
@@ -72,8 +74,11 @@ public class SentenceServiceImpl implements SentenceService {
 		discreteData = discreteDataNormalizer.process(discreteData);
 		if(discreteData.getOrganizationId()!=null){
 			DisceteDataComplianceDisplayFields fields = complianceDisplayFieldsDao.getbyOrgname(discreteData.getOrganizationId());
-			if(fields!=null)
-				discreteData.setBucketName(bucketIdentifier.getBucket(discreteData, sentences, fields));
+			if(fields!=null){
+				DiscreteDataBucketIdentifierResult result =  bucketIdentifier.getBucket(discreteData, sentences, fields);
+				discreteData.setBucketName(result.getBucketName());
+				discreteData.setIsCompliant(result.getIsCompliant());
+			}	
 		}
 		sentenceDao.saveSentences(documents, discreteData,sentenceProcessingFailures);
 	}
