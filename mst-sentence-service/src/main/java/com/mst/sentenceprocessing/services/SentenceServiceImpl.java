@@ -76,8 +76,10 @@ public class SentenceServiceImpl implements SentenceService {
 			DisceteDataComplianceDisplayFields fields = complianceDisplayFieldsDao.getbyOrgname(discreteData.getOrganizationId());
 			if(fields!=null){
 				DiscreteDataBucketIdentifierResult result =  bucketIdentifier.getBucket(discreteData, sentences, fields);
-				discreteData.setBucketName(result.getBucketName());
-				discreteData.setIsCompliant(result.getIsCompliant());
+				if(result!=null){
+					discreteData.setBucketName(result.getBucketName());
+					discreteData.setIsCompliant(result.getIsCompliant());
+				}
 			}	
 		}
 		sentenceDao.saveSentences(documents, discreteData,sentenceProcessingFailures);
