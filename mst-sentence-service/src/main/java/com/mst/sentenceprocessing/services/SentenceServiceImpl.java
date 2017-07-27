@@ -1,7 +1,10 @@
 package com.mst.sentenceprocessing.services;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import com.mst.dao.DisceteDataComplianceDisplayFieldsDaoImpl;
 import com.mst.dao.SentenceDaoImpl;
 import com.mst.dao.SentenceQueryDaoImpl;
@@ -15,6 +18,7 @@ import com.mst.interfaces.dao.SentenceDao;
 import com.mst.interfaces.dao.SentenceQueryDao;
 import com.mst.model.SentenceQuery.SentenceQueryInput;
 import com.mst.model.SentenceQuery.SentenceQueryResult;
+import com.mst.model.SentenceQuery.SentenceReprocessingInput;
 import com.mst.model.discrete.DisceteDataComplianceDisplayFields;
 import com.mst.model.discrete.DiscreteData;
 import com.mst.model.discrete.DiscreteDataBucketIdentifierResult;
@@ -85,6 +89,27 @@ public class SentenceServiceImpl implements SentenceService {
 		sentenceDao.saveSentences(documents, discreteData,sentenceProcessingFailures);
 	}
 	
+	public void reprocessSentences(List<SentenceDb> sentenceDb) {
+		controller.setMetadata(sentenceProcessingDbMetaDataInputFactory.create());
+		List<Sentence> sentences = SentenceConverter.convertToSentence(sentenceDb);
+    	for(Map.Entry<String, List<Sentence>> entry : groupSentencesByDiscretedata(sentences).entrySet()) {
+    		SentenceProcessingResult result = controller.reprocessSentences(entry.getValue());
+    		this.saveSentences(result.getSentences(),entry.getValue().get(0).getDiscreteData(),result.getFailures());
+		}	
+	}
+	
+	private Map<String, List<Sentence>>groupSentencesByDiscretedata(List<Sentence> sentences){
+		Map<String, List<Sentence>> sentencesByDiscreteDataId = new HashMap<>();
+		
+		for(Sentence sentence: sentences){
+			String key = sentence.getDiscreteData().getId().toString();
+			if(!sentencesByDiscreteDataId.containsKey(key));
+					sentencesByDiscreteDataId.put(key, new ArrayList<Sentence>());
+			sentencesByDiscreteDataId.get(key).add(sentence);
+		}
+		return sentencesByDiscreteDataId;
+	}
+
 	public List<Sentence> createSentences(SentenceRequest request) throws Exception{
     	controller.setMetadata(sentenceProcessingDbMetaDataInputFactory.create());
     	return controller.processSentences(request);
@@ -102,5 +127,10 @@ public class SentenceServiceImpl implements SentenceService {
 	
 	public List<String> getEdgeNamesForTokens(List<String> tokens) {
 		return sentenceQueryDao.getEdgeNamesByTokens(tokens);
+	}
+
+	@Override
+	public List<SentenceDb> getSentencesForReprocessing(SentenceReprocessingInput input) {
+		return sentenceQueryDao.getSentencesByToken(input);
 	}
 }

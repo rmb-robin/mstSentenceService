@@ -10,6 +10,7 @@ import javax.ws.rs.core.Response;
 import com.mst.interfaces.sentenceprocessing.DiscreteDataNormalizer;
 import com.mst.model.SentenceQuery.SentenceQueryInput;
 import com.mst.model.SentenceQuery.SentenceQueryResult;
+import com.mst.model.SentenceQuery.SentenceReprocessingInput;
 import com.mst.model.discrete.DiscreteData;
 import com.mst.model.requests.RejectedReport;
 import com.mst.model.requests.SentenceRequest;
@@ -57,6 +58,23 @@ public class SentenceController {
     		return Response.status(500).entity(ex.getMessage()).build();
     	}
     }
+
+    @POST
+	@Path("/reprocess")
+	public Response reprocess(SentenceReprocessingInput input) throws Exception{
+    	try{
+    		List<SentenceDb> sentenceDbs = sentenceService.getSentencesForReprocessing(input);
+    		if(sentenceDbs==null || sentenceDbs.isEmpty())
+    			return Response.status(200).entity("No Sentences To reprocess").build();
+    		sentenceService.reprocessSentences(sentenceDbs);
+    		return Response.status(200).entity("reprocessing successfully").build();
+    	}
+    	catch(Exception ex){
+    		return Response.status(500).entity(ex.getMessage()).build();
+    	}
+    }
+    
+    
     
     @POST
     @Path("/savetext")
