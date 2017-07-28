@@ -51,7 +51,7 @@ public class SentenceController {
 	public Response saveSentence(SentenceRequest request) throws Exception{
     	try{
 	    	List<Sentence> sentences = sentenceService.createSentences(request);
-	    	sentenceService.saveSentences(sentences, request.getDiscreteData(),null);
+	    	sentenceService.saveSentences(sentences, request.getDiscreteData(),null,false);
 		return Response.status(200).entity("sentences Saved successfully").build();
     	}
     	catch(Exception ex){
@@ -73,15 +73,13 @@ public class SentenceController {
     		return Response.status(500).entity(ex.getMessage()).build();
     	}
     }
-    
-    
-    
+   
     @POST
     @Path("/savetext")
     public Response saveText(SentenceTextRequest sentenceTextRequest){
     	try{
     		SentenceProcessingResult result = sentenceService.createSentences(sentenceTextRequest);
-	    	sentenceService.saveSentences(result.getSentences(), sentenceTextRequest.getDiscreteData(),result.getFailures());
+	    	sentenceService.saveSentences(result.getSentences(), sentenceTextRequest.getDiscreteData(),result.getFailures(),false);
 	    	return Response.status(200).entity("sentences Saved successfully").build();
     	}
     	catch(Exception ex){

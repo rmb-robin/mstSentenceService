@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bson.types.ObjectId;
+
 import com.mst.dao.DisceteDataComplianceDisplayFieldsDaoImpl;
 import com.mst.dao.SentenceDaoImpl;
 import com.mst.dao.SentenceQueryDaoImpl;
@@ -69,10 +71,13 @@ public class SentenceServiceImpl implements SentenceService {
 		return sentenceQueryDao.getSentences(input);
 	}
 
-	public void saveSentences(List<Sentence> sentences, DiscreteData discreteData, SentenceProcessingFailures sentenceProcessingFailures){
+	public void saveSentences(List<Sentence> sentences, DiscreteData discreteData, SentenceProcessingFailures sentenceProcessingFailures,boolean isReprocess){
 		List<SentenceDb> documents = new ArrayList<SentenceDb>();
 		for(Sentence sentence: sentences){
-			documents.add(SentenceConverter.convertToDocument(sentence));
+			SentenceDb document = SentenceConverter.convertToDocument(sentence);
+			if(isReprocess)
+				document.setId(new ObjectId(sentence.getId()));
+			documents.add(document);
 		}
 		
 		discreteData = discreteDataNormalizer.process(discreteData);
@@ -86,16 +91,24 @@ public class SentenceServiceImpl implements SentenceService {
 				}
 			}	
 		}
-		sentenceDao.saveSentences(documents, discreteData,sentenceProcessingFailures);
+		sentenceDao.saveSentences(documents, discreteData,sentenceProcessingFailures,isReprocess);
 	}
 	
 	public void reprocessSentences(List<SentenceDb> sentenceDb) {
 		controller.setMetadata(sentenceProcessingDbMetaDataInputFactory.create());
-		List<Sentence> sentences = SentenceConverter.convertToSentence(sentenceDb);
+		List<Sentence> sentences = SentenceConverter.convertToSentence(sentenceDb,false,false,false);
     	for(Map.Entry<String, List<Sentence>> entry : groupSentencesByDiscretedata(sentences).entrySet()) {
     		SentenceProcessingResult result = controller.reprocessSentences(entry.getValue());
-    		this.saveSentences(result.getSentences(),entry.getValue().get(0).getDiscreteData(),result.getFailures());
+    		DiscreteData discreteData = entry.getValue().get(0).getDiscreteData();
+    		cleanDiscreteDataForReprocess(discreteData);
+    		this.saveSentences(result.getSentences(),discreteData,result.getFailures(),true);
 		}	
+	}
+	
+	private void cleanDiscreteDataForReprocess(DiscreteData discreteData){
+		discreteData.getCustomFields().clear();
+		discreteData.setBucketName(null);
+		discreteData.setIsCompliant(false);
 	}
 	
 	private Map<String, List<Sentence>>groupSentencesByDiscretedata(List<Sentence> sentences){
