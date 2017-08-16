@@ -7,6 +7,7 @@ import org.mongodb.morphia.query.Query;
 
 import com.mst.interfaces.MongoDatastoreProvider;
 import com.mst.interfaces.SentenceProcessingMetaDataInputFactory;
+import com.mst.model.sentenceProcessing.DynamicEdgeCreationRule;
 import com.mst.model.sentenceProcessing.SentenceProcessingMetaDataInput;
 import com.mst.services.mst_sentence_service.Constants;
 
@@ -22,6 +23,13 @@ public class SentenceProcessingDbMetaDataInputFactory implements SentenceProcess
 	public SentenceProcessingMetaDataInput create() {
 		Query<SentenceProcessingMetaDataInput> query = mongoProvider.getDataStore().createQuery(SentenceProcessingMetaDataInput.class);
 		List<SentenceProcessingMetaDataInput> lst =  query.asList();		
-		return lst.get(0);
+		SentenceProcessingMetaDataInput meta =  lst.get(0);
+		meta.setDynamicEdgeCreationRules(getRules());
+		return meta;
+	}
+	
+	private List<DynamicEdgeCreationRule> getRules(){
+		Query<DynamicEdgeCreationRule> query = mongoProvider.getDataStore().createQuery(DynamicEdgeCreationRule.class);
+		return query.asList();		
 	}
 }

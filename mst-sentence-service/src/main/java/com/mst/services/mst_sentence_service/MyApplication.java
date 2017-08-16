@@ -18,7 +18,7 @@ public class MyApplication extends ResourceConfig {
     	objectMapper.registerModule(new JavaTimeModule());
     	// Register my custom provider - not needed if it's in my.package.
        // register(JacksonFeature.class);
-    	register(JacksonObjectMapper.class);
+    	register(JacksonObjectMapper.class);  
     	register(JacksonJaxbJsonProvider.class);
     }
 }

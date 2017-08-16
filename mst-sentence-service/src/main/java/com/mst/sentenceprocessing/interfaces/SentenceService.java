@@ -17,11 +17,11 @@ import com.mst.model.sentenceProcessing.SentenceProcessingResult;
 
 public interface SentenceService {
 	List<SentenceQueryResult> querySentences(SentenceQueryInput input) throws Exception;
-	void saveSentences(List<Sentence> sentences,DiscreteData discreteData, SentenceProcessingFailures failures,boolean isReprocess);
+	void saveSentences(List<Sentence> sentences,DiscreteData discreteData, SentenceProcessingFailures failures,boolean isReprocess, String reprocessId);
 	List<Sentence> createSentences(SentenceRequest request) throws Exception;
 	SentenceProcessingResult createSentences(SentenceTextRequest request) throws Exception;
 	SentenceProcessingMetaDataInput getSentenceProcessingMetadata();
 	List<String> getEdgeNamesForTokens(List<String> tokens);
 	List<SentenceDb> getSentencesForReprocessing(SentenceReprocessingInput input);
-	void reprocessSentences(List<SentenceDb> sentenceDb);
+	void reprocessSentences(SentenceReprocessingInput input);
 }

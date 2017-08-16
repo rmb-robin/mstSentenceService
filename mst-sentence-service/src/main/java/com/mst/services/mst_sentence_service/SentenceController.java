@@ -51,7 +51,7 @@ public class SentenceController {
 	public Response saveSentence(SentenceRequest request) throws Exception{
     	try{
 	    	List<Sentence> sentences = sentenceService.createSentences(request);
-	    	sentenceService.saveSentences(sentences, request.getDiscreteData(),null,false);
+	    	sentenceService.saveSentences(sentences, request.getDiscreteData(),null,false,null);
 		return Response.status(200).entity("sentences Saved successfully").build();
     	}
     	catch(Exception ex){
@@ -63,10 +63,7 @@ public class SentenceController {
 	@Path("/reprocess")
 	public Response reprocess(SentenceReprocessingInput input) throws Exception{
     	try{
-    		List<SentenceDb> sentenceDbs = sentenceService.getSentencesForReprocessing(input);
-    		if(sentenceDbs==null || sentenceDbs.isEmpty())
-    			return Response.status(200).entity("No Sentences To reprocess").build();
-    		sentenceService.reprocessSentences(sentenceDbs);
+    		sentenceService.reprocessSentences(input);
     		return Response.status(200).entity("reprocessing successfully").build();
     	}
     	catch(Exception ex){
@@ -79,7 +76,7 @@ public class SentenceController {
     public Response saveText(SentenceTextRequest sentenceTextRequest){
     	try{
     		SentenceProcessingResult result = sentenceService.createSentences(sentenceTextRequest);
-	    	sentenceService.saveSentences(result.getSentences(), sentenceTextRequest.getDiscreteData(),result.getFailures(),false);
+	    	sentenceService.saveSentences(result.getSentences(), sentenceTextRequest.getDiscreteData(),result.getFailures(),false,null);
 	    	return Response.status(200).entity("sentences Saved successfully").build();
     	}
     	catch(Exception ex){

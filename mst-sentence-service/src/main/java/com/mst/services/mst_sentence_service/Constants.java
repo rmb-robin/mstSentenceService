@@ -30,6 +30,10 @@ public class Constants {
 		}
     }
 
+	public static int reprocessBatchSize(){
+		return 1000;
+	}
+	
 	public static int getJwtTimeout(){
 		return 30;
 	}
