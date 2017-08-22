@@ -116,29 +116,30 @@ public class SentenceServiceImpl implements SentenceService {
 		}
 	}
 	
-	public void reprocessSentences(SentenceReprocessingInput input) {
+	public String reprocessSentences(SentenceReprocessingInput input) {
 		controller.setMetadata(sentenceProcessingDbMetaDataInputFactory.create());
 		String reprocessId = UUID.randomUUID().toString();
 		input.setReprocessId(reprocessId);
 		
 		while(true){
 			List<SentenceDb> documents = this.getSentencesForReprocessing(input);
-			if(documents.isEmpty()) return;
+			if(documents.isEmpty()) return null;
 			Set<String> discreteDataIds =  reprocessSentenceBatch(documents,reprocessId);
 			List<SentenceDb> sentencesForDiscreteData = sentenceQueryDao.getSentencesByDiscreteDataIds(discreteDataIds);
-			List<Sentence> sentences = SentenceConverter.convertToSentence(sentencesForDiscreteData,false,false,false);
-			Map<String, List<Sentence>> sentencesByDiscreteData = groupSentencesByDiscretedata(sentences);
+			List<Sentence> sentences = SentenceConverter.convertToSentence(sentencesForDiscreteData,true,true,false);
+			Map<String, List<Sentence>> sentencesByDiscreteData = SentenceByDiscreteDataMapper.groupSentencesByDiscretedata(sentences);
 			reprocessDiscreteData(sentencesByDiscreteData);
 			if(documents.size()< input.getTakeSize()) break;
 		}
+		return reprocessId;
 	}
 	
-	private void reprocessDiscreteData(Map<String, List<Sentence>> sentencesByDiscreteData){
-		
+	private void reprocessDiscreteData(Map<String, List<Sentence>> sentencesByDiscreteData){		
 		for(Map.Entry<String,List<Sentence>> entry: sentencesByDiscreteData.entrySet()){
 			List<Sentence> sentences = entry.getValue();
 			if(sentences.isEmpty()) continue;
 			DiscreteData discreteData = sentences.get(0).getDiscreteData();
+
 			cleanDiscreteDataForReprocess(discreteData);
 			processDiscreteData(discreteData, sentences);
 			discreteDataDao.save(discreteData, true);
@@ -164,18 +165,6 @@ public class SentenceServiceImpl implements SentenceService {
 		discreteData.setIsCompliant(false);
 	}
 	
-	private Map<String, List<Sentence>>groupSentencesByDiscretedata(List<Sentence> sentences){
-		Map<String, List<Sentence>> sentencesByDiscreteDataId = new HashMap<>();
-		
-		for(Sentence sentence: sentences){
-			String key = sentence.getDiscreteData().getId().toString();
-			if(!sentencesByDiscreteDataId.containsKey(key));
-					sentencesByDiscreteDataId.put(key, new ArrayList<Sentence>());
-			sentencesByDiscreteDataId.get(key).add(sentence);
-		}
-		return sentencesByDiscreteDataId;
-	}
-
 	public List<Sentence> createSentences(SentenceRequest request) throws Exception{
     	controller.setMetadata(sentenceProcessingDbMetaDataInputFactory.create());
     	return controller.processSentences(request);
@@ -198,5 +187,17 @@ public class SentenceServiceImpl implements SentenceService {
 	@Override
 	public List<SentenceDb> getSentencesForReprocessing(SentenceReprocessingInput input) {
 		return sentenceQueryDao.getSentencesForReprocess(input);
+	}
+
+	
+
+	@Override
+	public void reprocessDiscreteData(String id) {
+		Set<String> discreteDataIds = new HashSet<String>();
+		discreteDataIds.add(id);
+		List<SentenceDb> sentencesForDiscreteData = sentenceQueryDao.getSentencesByDiscreteDataIds(discreteDataIds);
+		List<Sentence> sentences = SentenceConverter.convertToSentence(sentencesForDiscreteData,true,true,false);
+		Map<String, List<Sentence>> sentencesByDiscreteData = SentenceByDiscreteDataMapper.groupSentencesByDiscretedata(sentences);
+		reprocessDiscreteData(sentencesByDiscreteData);
 	}
 }

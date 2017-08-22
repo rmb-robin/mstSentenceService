@@ -5,6 +5,7 @@ import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
 import com.mst.interfaces.sentenceprocessing.DiscreteDataNormalizer;
@@ -63,14 +64,26 @@ public class SentenceController {
 	@Path("/reprocess")
 	public Response reprocess(SentenceReprocessingInput input) throws Exception{
     	try{
-    		sentenceService.reprocessSentences(input);
-    		return Response.status(200).entity("reprocessing successfully").build();
+    		String reprocessId = sentenceService.reprocessSentences(input);
+    		return Response.status(200).entity(reprocessId).build();
     	}
     	catch(Exception ex){
     		return Response.status(500).entity(ex.getMessage()).build();
     	}
     }
    
+    @GET
+	@Path("/reprocessdiscretedata/{id}")
+	public Response reprocessDiscreteData(@PathParam("id") String id) throws Exception{
+    	try{
+    		sentenceService.reprocessDiscreteData(id);
+    		return Response.status(200).entity("reprocessing successfully").build();
+    	}
+    	catch(Exception ex){
+    		return Response.status(500).entity(ex.getMessage()).build();
+    	}
+    }
+    
     @POST
     @Path("/savetext")
     public Response saveText(SentenceTextRequest sentenceTextRequest){

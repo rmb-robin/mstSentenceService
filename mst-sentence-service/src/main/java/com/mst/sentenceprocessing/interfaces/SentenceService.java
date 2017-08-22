@@ -23,5 +23,6 @@ public interface SentenceService {
 	SentenceProcessingMetaDataInput getSentenceProcessingMetadata();
 	List<String> getEdgeNamesForTokens(List<String> tokens);
 	List<SentenceDb> getSentencesForReprocessing(SentenceReprocessingInput input);
-	void reprocessSentences(SentenceReprocessingInput input);
+	String reprocessSentences(SentenceReprocessingInput input);
+	void reprocessDiscreteData(String id);
 }
