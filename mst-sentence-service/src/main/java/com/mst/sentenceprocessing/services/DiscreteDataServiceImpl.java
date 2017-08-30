@@ -10,9 +10,11 @@ import com.mst.dao.DiscreteDataDaoImpl;
 import com.mst.dao.SentenceQueryDaoImpl;
 import com.mst.interfaces.DiscreteDataDao;
 import com.mst.interfaces.dao.SentenceQueryDao;
+import com.mst.interfaces.sentenceprocessing.DiscreteDataDuplicationIdentifier;
 import com.mst.model.discrete.DiscreteData;
 import com.mst.model.sentenceProcessing.Sentence;
 import com.mst.model.sentenceProcessing.SentenceDb;
+import com.mst.sentenceprocessing.DiscreteDataDuplicationIdentifierImpl;
 import com.mst.sentenceprocessing.SentenceConverter;
 import com.mst.sentenceprocessing.interfaces.DiscreteDataService;
 import com.mst.sentenceprocessing.models.DiscreteDataRequest;
@@ -23,6 +25,7 @@ public class DiscreteDataServiceImpl implements DiscreteDataService {
 
 	private DiscreteDataDao dao;
 	private SentenceQueryDao sentenceQueryDao;
+	private DiscreteDataDuplicationIdentifier discreteDataDuplicationIdentifier;
 	
 	public DiscreteDataServiceImpl(){
 		SentenceServiceMongoDatastoreProvider provider = new SentenceServiceMongoDatastoreProvider();
@@ -31,11 +34,13 @@ public class DiscreteDataServiceImpl implements DiscreteDataService {
 		
 		sentenceQueryDao = new SentenceQueryDaoImpl();
 		sentenceQueryDao.setMongoDatastoreProvider(provider);
+		discreteDataDuplicationIdentifier = new DiscreteDataDuplicationIdentifierImpl();
 	}
 	
 	@Override
 	public List<DiscreteDataResult> getDiscreteDatas(DiscreteDataRequest request) {
 		List<DiscreteData> discreteDatas =  dao.getDiscreteDatas(request.getDiscreteDataFilter(), request.getOrganizationId(),true);
+		discreteDataDuplicationIdentifier.process(discreteDatas);
 		List<DiscreteDataResult> results = new ArrayList<>();
 		for(DiscreteData discreteData: discreteDatas){
 			DiscreteDataResult result = new DiscreteDataResult();

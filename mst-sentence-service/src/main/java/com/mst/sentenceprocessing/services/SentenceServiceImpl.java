@@ -18,6 +18,7 @@ import com.mst.dao.SentenceQueryDaoImpl;
 import com.mst.interfaces.DiscreteDataDao;
 import com.mst.interfaces.MongoDatastoreProvider;
 import com.mst.interfaces.sentenceprocessing.DiscreteDataBucketIdentifier;
+import com.mst.interfaces.sentenceprocessing.DiscreteDataDuplicationIdentifier;
 import com.mst.interfaces.sentenceprocessing.DiscreteDataNormalizer;
 import com.mst.interfaces.sentenceprocessing.SentenceProcessingController;
 import com.mst.interfaces.SentenceProcessingMetaDataInputFactory;
@@ -38,6 +39,7 @@ import com.mst.model.sentenceProcessing.SentenceProcessingFailures;
 import com.mst.model.sentenceProcessing.SentenceProcessingMetaDataInput;
 import com.mst.model.sentenceProcessing.SentenceProcessingResult;
 import com.mst.sentenceprocessing.DiscreteDataBucketIdentifierImpl;
+import com.mst.sentenceprocessing.DiscreteDataDuplicationIdentifierImpl;
 import com.mst.sentenceprocessing.DiscreteDataNormalizerImpl;
 import com.mst.sentenceprocessing.SentenceConverter;
 import com.mst.sentenceprocessing.SentenceProcessingControllerImpl;
@@ -57,6 +59,7 @@ public class SentenceServiceImpl implements SentenceService {
 	private DiscreteDataBucketIdentifier bucketIdentifier;
 	private DisceteDataComplianceDisplayFieldsDao complianceDisplayFieldsDao;
 	private DiscreteDataDao discreteDataDao;
+	private DiscreteDataDuplicationIdentifier discreteDataDuplicationIdentifier;
 	
 	public SentenceServiceImpl(){
 		mongoProvider = new SentenceServiceMongoDatastoreProvider();
@@ -72,12 +75,23 @@ public class SentenceServiceImpl implements SentenceService {
 		complianceDisplayFieldsDao.setMongoDatastoreProvider(mongoProvider);
 		discreteDataDao = new DiscreteDataDaoImpl();
 		discreteDataDao.setMongoDatastoreProvider(mongoProvider);
+		discreteDataDuplicationIdentifier = new DiscreteDataDuplicationIdentifierImpl();
 	}
 	
 	public List<SentenceQueryResult> querySentences(SentenceQueryInput input) throws Exception{
 		if(input.getOrganizationId()==null)
 			throw new Exception("Missing OrgId");
-		return sentenceQueryDao.getSentences(input);
+		List<SentenceQueryResult> results =  sentenceQueryDao.getSentences(input);
+		Map<String,DiscreteData> discreteDatasById = new HashMap<>();
+		for(SentenceQueryResult result: results){
+			String key = result.getDiscreteData().getId().toString();
+			if(discreteDatasById.containsKey(key)) continue;
+			discreteDatasById.put(key, result.getDiscreteData());
+		}
+		
+		List<DiscreteData> discretaDatas = new ArrayList<DiscreteData>(discreteDatasById.values());
+		discreteDataDuplicationIdentifier.process(discretaDatas);
+		return results;
 	}
 
 	public void saveSentences(List<Sentence> sentences, DiscreteData discreteData, SentenceProcessingFailures sentenceProcessingFailures,boolean isReprocess, String reprocessId){
