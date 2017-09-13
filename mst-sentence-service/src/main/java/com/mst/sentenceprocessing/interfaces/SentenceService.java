@@ -17,7 +17,7 @@ import com.mst.model.sentenceProcessing.SentenceProcessingResult;
 
 public interface SentenceService {
 	List<SentenceQueryResult> querySentences(SentenceQueryInput input) throws Exception;
-	void saveSentences(List<Sentence> sentences,DiscreteData discreteData, SentenceProcessingFailures failures,boolean isReprocess, String reprocessId);
+	void saveSentences(List<Sentence> sentences,DiscreteData discreteData, SentenceProcessingFailures failures,boolean isReprocess, String reprocessId,String resultType);
 	List<Sentence> createSentences(SentenceRequest request) throws Exception;
 	SentenceProcessingResult createSentences(SentenceTextRequest request) throws Exception;
 	SentenceProcessingMetaDataInput getSentenceProcessingMetadata();

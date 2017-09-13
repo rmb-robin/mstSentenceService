@@ -31,6 +31,7 @@ import com.mst.model.SentenceQuery.SentenceReprocessingInput;
 import com.mst.model.discrete.DisceteDataComplianceDisplayFields;
 import com.mst.model.discrete.DiscreteData;
 import com.mst.model.discrete.DiscreteDataBucketIdentifierResult;
+import com.mst.model.metadataTypes.DiscreteDataBucketIdenticationType;
 import com.mst.model.requests.SentenceRequest;
 import com.mst.model.requests.SentenceTextRequest;
 import com.mst.model.sentenceProcessing.Sentence;
@@ -94,7 +95,7 @@ public class SentenceServiceImpl implements SentenceService {
 		return results;
 	}
 
-	public void saveSentences(List<Sentence> sentences, DiscreteData discreteData, SentenceProcessingFailures sentenceProcessingFailures,boolean isReprocess, String reprocessId){
+	public void saveSentences(List<Sentence> sentences, DiscreteData discreteData, SentenceProcessingFailures sentenceProcessingFailures,boolean isReprocess, String reprocessId, String resultType){
 		List<SentenceDb> documents = new ArrayList<SentenceDb>();
 		for(Sentence sentence: sentences){
 			SentenceDb document = SentenceConverter.convertToDocument(sentence);
@@ -106,7 +107,7 @@ public class SentenceServiceImpl implements SentenceService {
 		}
 		
 		if(!isReprocess){ 
-			processDiscreteData(discreteData, sentences);
+			processDiscreteData(discreteData, sentences,resultType);
 			sentenceDao.saveSentences(documents, discreteData,sentenceProcessingFailures);
 		}
 		else
@@ -115,19 +116,20 @@ public class SentenceServiceImpl implements SentenceService {
 		}
 	}
 	
-	private void processDiscreteData(DiscreteData discreteData, List<Sentence> sentences){
+	private void processDiscreteData(DiscreteData discreteData, List<Sentence> sentences, String resultType){
 		discreteData = discreteDataNormalizer.process(discreteData);
 		
-		if(discreteData.getOrganizationId()!=null){
-			DisceteDataComplianceDisplayFields fields = complianceDisplayFieldsDao.getbyOrgname(discreteData.getOrganizationId());
-			if(fields!=null){
-				DiscreteDataBucketIdentifierResult result =  bucketIdentifier.getBucket(discreteData, sentences, fields);
-				if(result!=null){
-					discreteData.setBucketName(result.getBucketName());
-					discreteData.setIsCompliant(result.getIsCompliant());
-				}
-			}	
-		}
+		if(discreteData.getOrganizationId()==null)return;
+		DisceteDataComplianceDisplayFields fields = complianceDisplayFieldsDao.getbyOrgname(discreteData.getOrganizationId());
+		if(fields==null) return; 
+		DiscreteDataBucketIdentifierResult result =  bucketIdentifier.getBucket(discreteData,resultType, sentences, fields);
+		if(result==null)return;
+		
+		discreteData.setBucketName(result.getBucketName());
+		if(result.equals(DiscreteDataBucketIdenticationType.compliance))
+			discreteData.setIsCompliant(result.getIsCompliant());
+		else 
+			discreteData.setExpectedFollowup(result.getExpectedFollowup());
 	}
 	
 	public String reprocessSentences(SentenceReprocessingInput input) {
@@ -155,7 +157,7 @@ public class SentenceServiceImpl implements SentenceService {
 			DiscreteData discreteData = sentences.get(0).getDiscreteData();
 
 			cleanDiscreteDataForReprocess(discreteData);
-			processDiscreteData(discreteData, sentences);
+			processDiscreteData(discreteData, sentences, DiscreteDataBucketIdenticationType.compliance);
 			discreteDataDao.save(discreteData, true);
 		}
 	}
@@ -169,7 +171,7 @@ public class SentenceServiceImpl implements SentenceService {
 			discreteDataIds.add(sentence.getDiscreteData().getId().toString());
 	
 		SentenceProcessingResult result = controller.reprocessSentences(sentences);
-		this.saveSentences(result.getSentences(),null,result.getFailures(),true,reprocessId);
+		this.saveSentences(result.getSentences(),null,result.getFailures(),true,reprocessId, DiscreteDataBucketIdenticationType.compliance);
 		return discreteDataIds;
 	}
 	

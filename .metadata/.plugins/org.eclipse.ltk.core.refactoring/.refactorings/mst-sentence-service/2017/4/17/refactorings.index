@@ -3,3 +3,8 @@
 1493055433116	Delete element
 1493055438733	Rename resource 'mt'
 1493055460329	Delete element
+1493306762921	Rename package 'com.mst.services.sentenceprocessing.dao'
+1493306798715	Move compilation unit
+1493333940682	Rename type 'SentenceService'
+1493334950065	Move compilation unit
+1493334956456	Delete element
