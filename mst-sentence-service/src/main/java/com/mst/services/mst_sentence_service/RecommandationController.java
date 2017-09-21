@@ -26,8 +26,9 @@ public class RecommandationController {
 	@Path("/save")
 	public Response saveRecommandation(RecommandationRequest request) throws Exception{
     	try{
-    		List<SentenceDiscovery> result =  service.createSentenceDiscovery(request);
-    		service.saveSentenceDiscoveries(result);
+    		List<SentenceDiscovery> sentenceDiscoveries =  service.createSentenceDiscovery(request);
+    		service.saveSentenceDiscoveries(sentenceDiscoveries);
+    		service.processingVerification(sentenceDiscoveries);
     		return Response.status(200).entity("discoveries Saved successfully").build();
     		
     	}

@@ -10,4 +10,5 @@ public interface RecommandationService {
 
 	List<SentenceDiscovery> createSentenceDiscovery(RecommandationRequest request) throws Exception;
 	void saveSentenceDiscoveries(List<SentenceDiscovery> sentenceDiscoveries);
+	void processingVerification(List<SentenceDiscovery> sentenceDiscoveries);
 }
