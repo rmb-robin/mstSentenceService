@@ -13,16 +13,19 @@ import com.mst.cache.implementation.RecommendedTokenRelationshipCacheManagerImpl
 import com.mst.cache.interfaces.RecommendedTokenRelationshipCacheManager;
 import com.mst.dao.RecommendedTokenRelationshipDaoImpl;
 import com.mst.dao.SentenceDiscoveryDaoImpl;
+import com.mst.filter.FriendOfFriendServiceImpl;
 import com.mst.interfaces.MongoDatastoreProvider;
 import com.mst.interfaces.SentenceProcessingMetaDataInputFactory;
 import com.mst.interfaces.dao.RecommendedTokenRelationshipDao;
 import com.mst.interfaces.dao.SentenceDiscoveryDao;
+import com.mst.interfaces.filter.FriendOfFriendService;
 import com.mst.interfaces.sentenceprocessing.SentenceDiscoveryProcessor;
 import com.mst.model.autocomplete.AutoCompleteRequest;
 import com.mst.model.metadataTypes.WordEmbeddingTypes;
 import com.mst.model.recommandation.RecommandedTokenRelationship;
 import com.mst.model.recommandation.SentenceDiscovery;
 import com.mst.model.requests.RecommandationRequest;
+import com.mst.model.sentenceProcessing.TokenRelationship;
 import com.mst.sentenceprocessing.RecommendationEdgesVerificationProcesser;
 import com.mst.sentenceprocessing.SentenceDiscoveryProcessorImpl;
 import com.mst.sentenceprocessing.dao.SentenceProcessingDbMetaDataInputFactory;
@@ -40,6 +43,7 @@ public class RecommandationServiceImpl implements RecommandationService {
 	private RecommendationEdgesVerificationProcesser recommendationEdgesVerificationProcesser; 
 	private RecommendedTokenRelationshipCacheManager cacheManger; 
 	private RecommendedTokenRelationshipAutocompleteQuery recommendedTokenRelationshipAutocompleteQuery;
+	private FriendOfFriendService friendOfFriendService;
 	public RecommandationServiceImpl() {
 		sentenceDiscoveryProcessor = new SentenceDiscoveryProcessorImpl();
 		mongoProvider = new SentenceServiceMongoDatastoreProvider();
@@ -51,6 +55,7 @@ public class RecommandationServiceImpl implements RecommandationService {
 		recommendationEdgesVerificationProcesser =new RecommendationEdgesVerificationProcesser();
 		cacheManger = new RecommendedTokenRelationshipCacheManagerImpl();
 		recommendedTokenRelationshipAutocompleteQuery = new RecommendedTokenRelationshipAutocompleteQueryImpl();
+		friendOfFriendService = new FriendOfFriendServiceImpl();
 	}
 
 	public List<SentenceDiscovery> createSentenceDiscovery(RecommandationRequest request) throws Exception {
@@ -58,36 +63,86 @@ public class RecommandationServiceImpl implements RecommandationService {
 		return sentenceDiscoveryProcessor.process(request);
 	}
 
-	@Override
-	public void saveRecommandedTokenRelationships(List<SentenceDiscovery> sentenceDiscoveries) {
-		recommendedTokenRelationshipDao.saveCollection(getAllRecommendTokenRelationships(sentenceDiscoveries));
+	
+	private void saveRecommandedTokenRelationships(List<SentenceDiscovery> sentenceDiscoveries,List<RecommandedTokenRelationship> existing) {
+		recommendedTokenRelationshipDao.saveCollection(getAllRecommendTokenRelationships(sentenceDiscoveries,existing));
 	}
 
 	
-	private List<RecommandedTokenRelationship> getAllRecommendTokenRelationships(List<SentenceDiscovery> sentenceDiscoveries){
+	private List<RecommandedTokenRelationship> getAllRecommendTokenRelationships(List<SentenceDiscovery> sentenceDiscoveries, List<RecommandedTokenRelationship> existing){
 		List<RecommandedTokenRelationship> result = new ArrayList<>();
 		
 		for(SentenceDiscovery sentenceDiscovery: sentenceDiscoveries){
+			sentenceDiscovery.setWordEmbeddings(
+					replaceSentenceDiscoveryRelationshipsWithExisting(sentenceDiscovery.getWordEmbeddings(), existing));
+			applyTokenRelationshipLinkages(sentenceDiscovery.getWordEmbeddings());
 			result.addAll(sentenceDiscovery.getWordEmbeddings());
 		}
 		return result;
 	}
 	
-	public void processingVerification(List<SentenceDiscovery> sentenceDiscoveries) {
-		List<RecommandedTokenRelationship> existing = recommendedTokenRelationshipDao.queryByKey(getkeys(sentenceDiscoveries));
+	private List<RecommandedTokenRelationship> replaceSentenceDiscoveryRelationshipsWithExisting
+		(List<RecommandedTokenRelationship> relationships, List<RecommandedTokenRelationship> existing){
+		
+		List<RecommandedTokenRelationship> result = new ArrayList<RecommandedTokenRelationship>();
+		Map<String,RecommandedTokenRelationship> existingMap = RecommandedTokenRelationshipUtil.getByUniqueKey(existing);
+		for(RecommandedTokenRelationship recommandedTokenRelationship: relationships){
+			if(existingMap.containsKey(recommandedTokenRelationship.getKey())){
+					result.add(existingMap.get(recommandedTokenRelationship.getKey()));
+					continue;
+			}
+			result.add(recommandedTokenRelationship);
+		}
+		return result;
+	}
+	
+	private void applyTokenRelationshipLinkages(List<RecommandedTokenRelationship> recommendedRelationships){
+		List<TokenRelationship> tokenRelations =
+				RecommandedTokenRelationshipUtil.getTokenRelationshipsFromRecommendedTokenRelationships(recommendedRelationships);
+				
+		for(RecommandedTokenRelationship r: recommendedRelationships){
+			List<TokenRelationship> links = friendOfFriendService.getFriendOfFriendForBothTokens(tokenRelations, r.getTokenRelationship());
+			if(links.size()==0)continue;
+			
+			for(TokenRelationship tokenRelationship: links){
+				r.getTokenRelationship().getLinks().add(tokenRelationship.getUniqueIdentifier());
+			}
+		}
+	}
+	
+	private void processingVerification(List<SentenceDiscovery> sentenceDiscoveries,List<RecommandedTokenRelationship> existing) {
+		
+		List<RecommandedTokenRelationship> verified = new ArrayList<>();
 		existing = filter(existing);
 		for(SentenceDiscovery sentenceDiscovery: sentenceDiscoveries){
 			sentenceDiscovery.setWordEmbeddings(recommendationEdgesVerificationProcesser.process(sentenceDiscovery, existing));
+			verified.addAll(getVerifiedFromSentenceDiscovery(sentenceDiscovery));
 		}
 		dao.saveSentenceDiscovieries(sentenceDiscoveries);
+		recommendedTokenRelationshipDao.saveCollection(verified);
+		loadRecommandedTokenRelationshipIntoCach(verified);
 	}
 	
-	//add filter for to-to...
-	
+
+	private List<RecommandedTokenRelationship> getVerifiedFromSentenceDiscovery(SentenceDiscovery discovery){
+		List<RecommandedTokenRelationship> verified = new ArrayList<RecommandedTokenRelationship>();
+		
+		for(RecommandedTokenRelationship recommandedTokenRelationship: discovery.getWordEmbeddings()){
+			if(recommandedTokenRelationship.getIsVerified())
+				verified.add(recommandedTokenRelationship);
+		}
+		
+		return verified;
+		
+	}
+
 	private List<RecommandedTokenRelationship> filter(List<RecommandedTokenRelationship> existing){
+		
 		List<RecommandedTokenRelationship> result = new ArrayList<>();
 		for(RecommandedTokenRelationship recommandedTokenRelationship: existing){
-			if(recommandedTokenRelationship.getTokenRelationship().getEdgeName().equals(WordEmbeddingTypes.defaultEdge))
+			String edgeName = recommandedTokenRelationship.getTokenRelationship().getEdgeName();
+			if(edgeName.equals(WordEmbeddingTypes.defaultEdge) || edgeName.equals(WordEmbeddingTypes.secondPrep) 
+					|| edgeName.equals(WordEmbeddingTypes.secondVerb) || edgeName.equals(WordEmbeddingTypes.firstPrep) || edgeName.equals(WordEmbeddingTypes.firstVerb) )
 				result.add(recommandedTokenRelationship);
 		}
 		return result;
@@ -117,14 +172,26 @@ public class RecommandationServiceImpl implements RecommandationService {
 
 	public void reloadCache() {
 		List<RecommandedTokenRelationship> recommandedTokenRelationships =  this.recommendedTokenRelationshipDao.getVerified();
+		loadRecommandedTokenRelationshipIntoCach(recommandedTokenRelationships);
+	}
+
+	private void loadRecommandedTokenRelationshipIntoCach(List<RecommandedTokenRelationship> recommandedTokenRelationships){
 		Map<String, List<RecommandedTokenRelationship>> uniqueByToken = RecommandedTokenRelationshipUtil.getMapByDistinctToFrom(recommandedTokenRelationships);
 		for(Entry<String, List<RecommandedTokenRelationship>> entry: uniqueByToken.entrySet()){
 			cacheManger.reload(entry.getKey(), entry.getValue());
 		}
 	}
-
+	
 	@Override
 	public List<String> getAutoComplete(AutoCompleteRequest autoCompleteRequest) {
 		return recommendedTokenRelationshipAutocompleteQuery.getNextWord(autoCompleteRequest);
+	}
+
+	@Override
+	public void saveSentenceDiscoveryProcess(RecommandationRequest request) throws Exception {
+		List<SentenceDiscovery> sentenceDiscoveries =  this.createSentenceDiscovery(request);
+		List<RecommandedTokenRelationship> existing = recommendedTokenRelationshipDao.queryByKey(getkeys(sentenceDiscoveries));
+		this.saveRecommandedTokenRelationships(sentenceDiscoveries,existing);
+		this.processingVerification(sentenceDiscoveries,existing);
 	}
 }

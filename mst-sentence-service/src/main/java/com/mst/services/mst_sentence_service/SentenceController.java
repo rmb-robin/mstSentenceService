@@ -14,6 +14,7 @@ import javax.ws.rs.core.Response;
 import com.mst.interfaces.sentenceprocessing.DiscreteDataNormalizer;
 import com.mst.model.SentenceQuery.SentenceQueryInput;
 import com.mst.model.SentenceQuery.SentenceQueryResult;
+import com.mst.model.SentenceQuery.SentenceQueryTextInput;
 import com.mst.model.SentenceQuery.SentenceReprocessingInput;
 import com.mst.model.discrete.DiscreteData;
 import com.mst.model.metadataTypes.DiscreteDataBucketIdenticationType;
@@ -130,6 +131,24 @@ public class SentenceController {
     		return Response.status(500).entity(ex.getMessage()).build();
     	}
     }
+    
+    
+    @POST
+    @Path("/querytext")
+    public Response queryTextSentences(SentenceQueryTextInput input){
+    	try{
+	    	List<SentenceQueryResult> queryResults = sentenceService.queryTextSentences(input);
+	    	SentenceQueryOutput result = new SentenceQueryOutput();
+	    	result.setSentenceQueryResults(queryResults);
+	    	result.setSize(queryResults.size());
+    	return Response.status(200).entity(result).build(); 
+    	}
+    	catch(Exception ex){
+    		return Response.status(500).entity(ex.getMessage()).build();
+    	}
+    }
+    
+    
     
     @GET
     @Path("processingdata")

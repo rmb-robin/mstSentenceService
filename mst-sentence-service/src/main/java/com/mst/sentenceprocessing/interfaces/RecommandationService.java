@@ -9,9 +9,7 @@ import com.mst.model.sentenceProcessing.Sentence;
 
 public interface RecommandationService {
 
-	List<SentenceDiscovery> createSentenceDiscovery(RecommandationRequest request) throws Exception;
-	void saveRecommandedTokenRelationships(List<SentenceDiscovery> sentenceDiscoveries);
-	void processingVerification(List<SentenceDiscovery> sentenceDiscoveries);
 	void reloadCache();
 	List<String> getAutoComplete(AutoCompleteRequest autoCompleteRequest);
+	void saveSentenceDiscoveryProcess(RecommandationRequest request) throws Exception;
 }

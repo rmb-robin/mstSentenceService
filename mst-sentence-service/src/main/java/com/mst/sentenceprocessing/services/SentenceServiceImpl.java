@@ -27,6 +27,7 @@ import com.mst.interfaces.dao.SentenceDao;
 import com.mst.interfaces.dao.SentenceQueryDao;
 import com.mst.model.SentenceQuery.SentenceQueryInput;
 import com.mst.model.SentenceQuery.SentenceQueryResult;
+import com.mst.model.SentenceQuery.SentenceQueryTextInput;
 import com.mst.model.SentenceQuery.SentenceReprocessingInput;
 import com.mst.model.discrete.DisceteDataComplianceDisplayFields;
 import com.mst.model.discrete.DiscreteData;
@@ -79,10 +80,7 @@ public class SentenceServiceImpl implements SentenceService {
 		discreteDataDuplicationIdentifier = new DiscreteDataDuplicationIdentifierImpl();
 	}
 	
-	public List<SentenceQueryResult> querySentences(SentenceQueryInput input) throws Exception{
-		if(input.getOrganizationId()==null)
-			throw new Exception("Missing OrgId");
-		List<SentenceQueryResult> results =  sentenceQueryDao.getSentences(input);
+	private void processQueryDiscreteData(List<SentenceQueryResult> results){
 		Map<String,DiscreteData> discreteDatasById = new HashMap<>();
 		for(SentenceQueryResult result: results){
 			String key = result.getDiscreteData().getId().toString();
@@ -92,6 +90,23 @@ public class SentenceServiceImpl implements SentenceService {
 		
 		List<DiscreteData> discretaDatas = new ArrayList<DiscreteData>(discreteDatasById.values());
 		discreteDataDuplicationIdentifier.process(discretaDatas);
+	}
+	
+	public List<SentenceQueryResult> querySentences(SentenceQueryInput input) throws Exception{
+		if(input.getOrganizationId()==null)
+			throw new Exception("Missing OrgId");
+		List<SentenceQueryResult> results =  sentenceQueryDao.getSentences(input);
+		processQueryDiscreteData(results);
+		return results;
+	}
+	
+	
+	@Override
+	public List<SentenceQueryResult> queryTextSentences(SentenceQueryTextInput input) throws Exception {
+		if(input.getOrganizationId()==null)
+			throw new Exception("Missing OrgId");
+		List<SentenceQueryResult> results =  sentenceQueryDao.getSentencesByText(input);
+		processQueryDiscreteData(results);
 		return results;
 	}
 
@@ -216,4 +231,6 @@ public class SentenceServiceImpl implements SentenceService {
 		Map<String, List<Sentence>> sentencesByDiscreteData = SentenceByDiscreteDataMapper.groupSentencesByDiscretedata(sentences);
 		reprocessDiscreteData(sentencesByDiscreteData);
 	}
+
+
 }
