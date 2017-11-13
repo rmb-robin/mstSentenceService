@@ -106,7 +106,7 @@ public class SentenceServiceImpl implements SentenceService {
 		if(input.getOrganizationId()==null)
 			throw new Exception("Missing OrgId");
 		List<SentenceQueryResult> results =  sentenceQueryDao.getSentencesByText(input);
-		processQueryDiscreteData(results);
+		//processQueryDiscreteData(results);
 		return results;
 	}
 
