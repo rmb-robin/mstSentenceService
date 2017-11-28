@@ -96,18 +96,10 @@ public class SentenceController {
     public Response saveText(SentenceTextRequest sentenceTextRequest){
     	try{
     		
-    		String discreteDataResultType = DiscreteDataBucketIdenticationType.compliance;
-    		if(sentenceTextRequest.isNeedResult())
-    			discreteDataResultType = DiscreteDataBucketIdenticationType.followup;
-    		SentenceProcessingResult result = sentenceService.createSentences(sentenceTextRequest);
-	    	sentenceService.saveSentences(result.getSentences(), sentenceTextRequest.getDiscreteData(),result.getFailures(),false,null,discreteDataResultType);
-	    	if(sentenceTextRequest.isNeedResult()){
-	    		SaveSentenceTextResponse saveSentenceTextResponse = SaveSentenceTextResponseFactory.
-	    				create(sentenceTextRequest.getDiscreteData().getId().toString(), sentenceTextRequest.getDiscreteData().getExpectedFollowup());
-	    		return Response.status(200).entity(saveSentenceTextResponse).build();	
-	    	}
+    		SaveSentenceTextResponse saveSentenceTextResponse = sentenceService.processSentenceTextRequest(sentenceTextRequest);
+    		if(saveSentenceTextResponse!=null)
+    			return Response.status(200).entity(saveSentenceTextResponse).build();	
 	    	return Response.status(200).entity("sentences Saved successfully").build();	
-	    	
     	}
     	catch(Exception ex){
     		return Response.status(500).entity(ex.getMessage()).build();

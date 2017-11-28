@@ -14,6 +14,7 @@ import com.mst.model.sentenceProcessing.SentenceDb;
 import com.mst.model.sentenceProcessing.SentenceProcessingFailures;
 import com.mst.model.sentenceProcessing.SentenceProcessingMetaDataInput;
 import com.mst.model.sentenceProcessing.SentenceProcessingResult;
+import com.mst.sentenceprocessing.models.SaveSentenceTextResponse;
 
 
 public interface SentenceService {
@@ -27,4 +28,5 @@ public interface SentenceService {
 	List<SentenceDb> getSentencesForReprocessing(SentenceReprocessingInput input);
 	String reprocessSentences(SentenceReprocessingInput input);
 	void reprocessDiscreteData(String id);
+	SaveSentenceTextResponse processSentenceTextRequest(SentenceTextRequest request) throws Exception;
 }

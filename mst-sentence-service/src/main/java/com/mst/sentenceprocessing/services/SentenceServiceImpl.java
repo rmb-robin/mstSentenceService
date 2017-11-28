@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.ws.rs.core.Response;
+
 import org.bson.types.ObjectId;
 
 import com.mst.dao.DisceteDataComplianceDisplayFieldsDaoImpl;
@@ -47,6 +49,7 @@ import com.mst.sentenceprocessing.SentenceConverter;
 import com.mst.sentenceprocessing.SentenceProcessingControllerImpl;
 import com.mst.sentenceprocessing.dao.SentenceProcessingDbMetaDataInputFactory;
 import com.mst.sentenceprocessing.interfaces.SentenceService;
+import com.mst.sentenceprocessing.models.SaveSentenceTextResponse;
 import com.mst.services.mst_sentence_service.Constants;
 import com.mst.services.mst_sentence_service.SentenceServiceMongoDatastoreProvider;
 
@@ -230,6 +233,21 @@ public class SentenceServiceImpl implements SentenceService {
 		List<Sentence> sentences = SentenceConverter.convertToSentence(sentencesForDiscreteData,true,true,false);
 		Map<String, List<Sentence>> sentencesByDiscreteData = SentenceByDiscreteDataMapper.groupSentencesByDiscretedata(sentences);
 		reprocessDiscreteData(sentencesByDiscreteData);
+	}
+
+	@Override
+	public SaveSentenceTextResponse processSentenceTextRequest(SentenceTextRequest sentenceTextRequest) throws Exception {
+		String discreteDataResultType = DiscreteDataBucketIdenticationType.compliance;
+		if(sentenceTextRequest.isNeedResult())
+			discreteDataResultType = DiscreteDataBucketIdenticationType.followup;
+		SentenceProcessingResult result = this.createSentences(sentenceTextRequest);
+    	this.saveSentences(result.getSentences(), sentenceTextRequest.getDiscreteData(),result.getFailures(),false,null,discreteDataResultType);
+    	if(sentenceTextRequest.isNeedResult()){
+    		return SaveSentenceTextResponseFactory.
+    				create(sentenceTextRequest.getDiscreteData().getId().toString(), sentenceTextRequest.getDiscreteData().getExpectedFollowup());
+    		
+    	}
+    	return null;
 	}
 
 

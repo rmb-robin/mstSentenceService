@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import com.mst.autocomplete.implementation.RecommendedTokenRelationshipAutocompleteQueryImpl;
 import com.mst.autocomplete.interfaces.RecommendedTokenRelationshipAutocompleteQuery;
@@ -119,8 +120,16 @@ public class RecommandationServiceImpl implements RecommandationService {
 			verified.addAll(getVerifiedFromSentenceDiscovery(sentenceDiscovery));
 		}
 		dao.saveSentenceDiscovieries(sentenceDiscoveries);
+		updateVerifiedUniqueIds(verified);
 		recommendedTokenRelationshipDao.saveCollection(verified);
 		loadRecommandedTokenRelationshipIntoCach(verified);
+	}
+
+	private void updateVerifiedUniqueIds(List<RecommandedTokenRelationship> verified){
+		for(RecommandedTokenRelationship r: verified){
+			if(r.getTokenRelationship().getUniqueIdentifier()==null)
+				r.getTokenRelationship().setUniqueIdentifier(UUID.randomUUID().toString());
+		}
 	}
 	
 
