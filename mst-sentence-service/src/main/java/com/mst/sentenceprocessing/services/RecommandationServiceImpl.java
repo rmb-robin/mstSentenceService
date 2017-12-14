@@ -22,10 +22,12 @@ import com.mst.interfaces.dao.SentenceDiscoveryDao;
 import com.mst.interfaces.filter.FriendOfFriendService;
 import com.mst.interfaces.sentenceprocessing.SentenceDiscoveryProcessor;
 import com.mst.model.autocomplete.AutoCompleteRequest;
+import com.mst.model.discrete.DiscreteData;
 import com.mst.model.metadataTypes.WordEmbeddingTypes;
 import com.mst.model.recommandation.RecommandedTokenRelationship;
 import com.mst.model.recommandation.SentenceDiscovery;
 import com.mst.model.requests.RecommandationRequest;
+import com.mst.model.requests.SentenceTextRequest;
 import com.mst.model.sentenceProcessing.TokenRelationship;
 import com.mst.sentenceprocessing.RecommendationEdgesVerificationProcesser;
 import com.mst.sentenceprocessing.SentenceDiscoveryProcessorImpl;
@@ -59,12 +61,11 @@ public class RecommandationServiceImpl implements RecommandationService {
 		friendOfFriendService = new FriendOfFriendServiceImpl();
 	}
 
-	public List<SentenceDiscovery> createSentenceDiscovery(RecommandationRequest request) throws Exception {
+	public List<SentenceDiscovery> createSentenceDiscovery(SentenceTextRequest request) throws Exception {
 		sentenceDiscoveryProcessor.setMetadata(sentenceProcessingDbMetaDataInputFactory.create());
 		return sentenceDiscoveryProcessor.process(request);
 	}
 
-	
 	private void saveRecommandedTokenRelationships(List<SentenceDiscovery> sentenceDiscoveries,List<RecommandedTokenRelationship> existing) {
 		recommendedTokenRelationshipDao.saveCollection(getAllRecommendTokenRelationships(sentenceDiscoveries,existing));
 	}
@@ -111,7 +112,7 @@ public class RecommandationServiceImpl implements RecommandationService {
 		}
 	}
 	
-	private void processingVerification(List<SentenceDiscovery> sentenceDiscoveries,List<RecommandedTokenRelationship> existing) {
+	private void processingVerification(List<SentenceDiscovery> sentenceDiscoveries,List<RecommandedTokenRelationship> existing, DiscreteData discreteData) {
 		
 		List<RecommandedTokenRelationship> verified = new ArrayList<>();
 		existing = filter(existing);
@@ -119,7 +120,7 @@ public class RecommandationServiceImpl implements RecommandationService {
 			sentenceDiscovery.setWordEmbeddings(recommendationEdgesVerificationProcesser.process(sentenceDiscovery, existing));
 			verified.addAll(getVerifiedFromSentenceDiscovery(sentenceDiscovery));
 		}
-		dao.saveSentenceDiscovieries(sentenceDiscoveries);
+		dao.saveSentenceDiscoveries(sentenceDiscoveries,discreteData,null);
 		updateVerifiedUniqueIds(verified);
 		recommendedTokenRelationshipDao.saveCollection(verified);
 		loadRecommandedTokenRelationshipIntoCach(verified);
@@ -197,10 +198,10 @@ public class RecommandationServiceImpl implements RecommandationService {
 	}
 
 	@Override
-	public void saveSentenceDiscoveryProcess(RecommandationRequest request) throws Exception {
+	public void saveSentenceDiscoveryProcess(SentenceTextRequest request) throws Exception {
 		List<SentenceDiscovery> sentenceDiscoveries =  this.createSentenceDiscovery(request);
 		List<RecommandedTokenRelationship> existing = recommendedTokenRelationshipDao.queryByKey(getkeys(sentenceDiscoveries));
 		this.saveRecommandedTokenRelationships(sentenceDiscoveries,existing);
-		this.processingVerification(sentenceDiscoveries,existing);
+		this.processingVerification(sentenceDiscoveries,existing,request.getDiscreteData());
 	}
 }

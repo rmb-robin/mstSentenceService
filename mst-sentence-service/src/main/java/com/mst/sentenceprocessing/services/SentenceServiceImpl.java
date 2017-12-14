@@ -21,6 +21,7 @@ import com.mst.interfaces.DiscreteDataDao;
 import com.mst.interfaces.MongoDatastoreProvider;
 import com.mst.interfaces.sentenceprocessing.DiscreteDataBucketIdentifier;
 import com.mst.interfaces.sentenceprocessing.DiscreteDataDuplicationIdentifier;
+import com.mst.interfaces.sentenceprocessing.DiscreteDataInputProcesser;
 import com.mst.interfaces.sentenceprocessing.DiscreteDataNormalizer;
 import com.mst.interfaces.sentenceprocessing.SentenceProcessingController;
 import com.mst.interfaces.SentenceProcessingMetaDataInputFactory;
@@ -44,6 +45,7 @@ import com.mst.model.sentenceProcessing.SentenceProcessingMetaDataInput;
 import com.mst.model.sentenceProcessing.SentenceProcessingResult;
 import com.mst.sentenceprocessing.DiscreteDataBucketIdentifierImpl;
 import com.mst.sentenceprocessing.DiscreteDataDuplicationIdentifierImpl;
+import com.mst.sentenceprocessing.DiscreteDataInputProcesserImpl;
 import com.mst.sentenceprocessing.DiscreteDataNormalizerImpl;
 import com.mst.sentenceprocessing.SentenceConverter;
 import com.mst.sentenceprocessing.SentenceProcessingControllerImpl;
@@ -60,9 +62,7 @@ public class SentenceServiceImpl implements SentenceService {
 	private MongoDatastoreProvider  mongoProvider; 
 	private SentenceProcessingMetaDataInputFactory sentenceProcessingDbMetaDataInputFactory;
 	private SentenceProcessingController controller; 
-	private DiscreteDataNormalizer discreteDataNormalizer; 
-	private DiscreteDataBucketIdentifier bucketIdentifier;
-	private DisceteDataComplianceDisplayFieldsDao complianceDisplayFieldsDao;
+	private DiscreteDataInputProcesser discreteDataInputProcesser;
 	private DiscreteDataDao discreteDataDao;
 	private DiscreteDataDuplicationIdentifier discreteDataDuplicationIdentifier;
 	
@@ -74,10 +74,8 @@ public class SentenceServiceImpl implements SentenceService {
 		sentenceDao.setMongoDatastoreProvider(mongoProvider);
 		sentenceProcessingDbMetaDataInputFactory = new SentenceProcessingDbMetaDataInputFactory(mongoProvider);
 		controller = new SentenceProcessingControllerImpl();
-		discreteDataNormalizer = new DiscreteDataNormalizerImpl();
-		bucketIdentifier = new DiscreteDataBucketIdentifierImpl();
-		complianceDisplayFieldsDao = new DisceteDataComplianceDisplayFieldsDaoImpl();
-		complianceDisplayFieldsDao.setMongoDatastoreProvider(mongoProvider);
+	
+		discreteDataInputProcesser = new DiscreteDataInputProcesserImpl(mongoProvider);
 		discreteDataDao = new DiscreteDataDaoImpl();
 		discreteDataDao.setMongoDatastoreProvider(mongoProvider);
 		discreteDataDuplicationIdentifier = new DiscreteDataDuplicationIdentifierImpl();
@@ -125,7 +123,7 @@ public class SentenceServiceImpl implements SentenceService {
 		}
 		
 		if(!isReprocess){ 
-			processDiscreteData(discreteData, sentences,resultType);
+			discreteDataInputProcesser.processDiscreteData(discreteData, sentences,resultType);
 			sentenceDao.saveSentences(documents, discreteData,sentenceProcessingFailures);
 		}
 		else
@@ -134,21 +132,8 @@ public class SentenceServiceImpl implements SentenceService {
 		}
 	}
 	
-	private void processDiscreteData(DiscreteData discreteData, List<Sentence> sentences, String resultType){
-		discreteData = discreteDataNormalizer.process(discreteData);
-		
-		if(discreteData.getOrganizationId()==null)return;
-		DisceteDataComplianceDisplayFields fields = complianceDisplayFieldsDao.getbyOrgname(discreteData.getOrganizationId());
-		if(fields==null) return; 
-		DiscreteDataBucketIdentifierResult result =  bucketIdentifier.getBucket(discreteData,resultType, sentences, fields);
-		if(result==null)return;
-		
-		discreteData.setBucketName(result.getBucketName());
-		if(result.equals(DiscreteDataBucketIdenticationType.compliance))
-			discreteData.setIsCompliant(result.getIsCompliant());
-		else 
-			discreteData.setExpectedFollowup(result.getExpectedFollowup());
-	}
+	//move to other project...
+
 	
 	public String reprocessSentences(SentenceReprocessingInput input) {
 		controller.setMetadata(sentenceProcessingDbMetaDataInputFactory.create());
@@ -175,7 +160,7 @@ public class SentenceServiceImpl implements SentenceService {
 			DiscreteData discreteData = sentences.get(0).getDiscreteData();
 
 			cleanDiscreteDataForReprocess(discreteData);
-			processDiscreteData(discreteData, sentences, DiscreteDataBucketIdenticationType.compliance);
+			discreteDataInputProcesser.processDiscreteData(discreteData, sentences, DiscreteDataBucketIdenticationType.compliance);
 			discreteDataDao.save(discreteData, true);
 		}
 	}
@@ -240,6 +225,7 @@ public class SentenceServiceImpl implements SentenceService {
 		String discreteDataResultType = DiscreteDataBucketIdenticationType.compliance;
 		if(sentenceTextRequest.isNeedResult())
 			discreteDataResultType = DiscreteDataBucketIdenticationType.followup;
+	
 		SentenceProcessingResult result = this.createSentences(sentenceTextRequest);
     	this.saveSentences(result.getSentences(), sentenceTextRequest.getDiscreteData(),result.getFailures(),false,null,discreteDataResultType);
     	if(sentenceTextRequest.isNeedResult()){

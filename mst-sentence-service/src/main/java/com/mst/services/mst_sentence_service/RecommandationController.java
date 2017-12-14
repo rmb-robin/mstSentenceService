@@ -11,6 +11,7 @@ import javax.ws.rs.core.Response;
 import com.mst.model.autocomplete.AutoCompleteRequest;
 import com.mst.model.recommandation.SentenceDiscovery;
 import com.mst.model.requests.RecommandationRequest;
+import com.mst.model.requests.SentenceTextRequest;
 import com.mst.sentenceprocessing.interfaces.RecommandationService;
 import com.mst.sentenceprocessing.services.RecommandationServiceImpl;
  
@@ -25,7 +26,7 @@ public class RecommandationController {
 	
 	@POST
 	@Path("/save")
-	public Response saveRecommandation(RecommandationRequest request) throws Exception{
+	public Response saveRecommandation(SentenceTextRequest request) throws Exception{
     	try{
     		service.saveSentenceDiscoveryProcess(request);
     		return Response.status(200).entity("discoveries Saved successfully").build();

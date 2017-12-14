@@ -11,6 +11,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
+import com.mst.filter.NotAndAllRequestFactoryImpl;
 import com.mst.interfaces.sentenceprocessing.DiscreteDataNormalizer;
 import com.mst.model.SentenceQuery.SentenceQueryInput;
 import com.mst.model.SentenceQuery.SentenceQueryResult;
@@ -26,8 +27,10 @@ import com.mst.model.sentenceProcessing.SentenceDb;
 import com.mst.model.sentenceProcessing.SentenceProcessingMetaDataInput;
 import com.mst.model.sentenceProcessing.SentenceProcessingResult;
 import com.mst.sentenceprocessing.DiscreteDataNormalizerImpl;
+import com.mst.sentenceprocessing.interfaces.RecommandationService;
 import com.mst.sentenceprocessing.interfaces.SentenceService;
 import com.mst.sentenceprocessing.models.SaveSentenceTextResponse;
+import com.mst.sentenceprocessing.services.RecommandationServiceImpl;
 import com.mst.sentenceprocessing.services.SaveSentenceTextResponseFactory;
 import com.mst.sentenceprocessing.services.SentenceServiceImpl;
 import org.apache.log4j.Logger;
@@ -36,12 +39,13 @@ import org.apache.log4j.Logger;
 public class SentenceController {
 
 	private SentenceService sentenceService; 
+	private RecommandationService recommandationService;
 	
 	public SentenceController() {
 		sentenceService = new SentenceServiceImpl();
+		recommandationService = new RecommandationServiceImpl();
 	}
-	
-	
+
 	@POST
 	@Path("/getedgesfortokens")
 	public Response getEdgeNamesForTokens(List<String> tokens){
@@ -95,10 +99,10 @@ public class SentenceController {
     @Path("/savetext")
     public Response saveText(SentenceTextRequest sentenceTextRequest){
     	try{
-    		
-    		SaveSentenceTextResponse saveSentenceTextResponse = sentenceService.processSentenceTextRequest(sentenceTextRequest);
-    		if(saveSentenceTextResponse!=null)
-    			return Response.status(200).entity(saveSentenceTextResponse).build();	
+    		//SaveSentenceTextResponse saveSentenceTextResponse =
+    		recommandationService.saveSentenceDiscoveryProcess(sentenceTextRequest);
+//    		if(saveSentenceTextResponse!=null)
+//    			return Response.status(200).entity(saveSentenceTextResponse).build();	
 	    	return Response.status(200).entity("sentences Saved successfully").build();	
     	}
     	catch(Exception ex){
@@ -147,5 +151,17 @@ public class SentenceController {
     public Response getProcessingData(){
     	SentenceProcessingMetaDataInput input = sentenceService.getSentenceProcessingMetadata();
     	return Response.status(200).entity(input).build();
+    }
+    
+    @POST 
+    @Path("/testandnotall")
+    public Response testAndNotAll(SentenceQueryInput input){
+    	try{
+    		SentenceQueryInput result = new NotAndAllRequestFactoryImpl().create(input);
+    		return Response.status(200).entity(result).build();
+    	}
+    	catch(Exception ex){
+    		return Response.status(500).entity(ex.getMessage()).build();
+    	}
     }
 }
