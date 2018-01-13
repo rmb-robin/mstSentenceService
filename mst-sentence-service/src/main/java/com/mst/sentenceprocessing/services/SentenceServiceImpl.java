@@ -17,6 +17,8 @@ import com.mst.dao.DisceteDataComplianceDisplayFieldsDaoImpl;
 import com.mst.dao.DiscreteDataDaoImpl;
 import com.mst.dao.SentenceDaoImpl;
 import com.mst.dao.SentenceQueryDaoImpl;
+import com.mst.filter.NotAndAllRequestFactoryImpl;
+import com.mst.filter.SentenceQueryConverterImpl;
 import com.mst.interfaces.DiscreteDataDao;
 import com.mst.interfaces.MongoDatastoreProvider;
 import com.mst.interfaces.sentenceprocessing.DiscreteDataBucketIdentifier;
@@ -28,7 +30,9 @@ import com.mst.interfaces.SentenceProcessingMetaDataInputFactory;
 import com.mst.interfaces.dao.DisceteDataComplianceDisplayFieldsDao;
 import com.mst.interfaces.dao.SentenceDao;
 import com.mst.interfaces.dao.SentenceQueryDao;
+import com.mst.interfaces.filter.SentenceQueryConverter;
 import com.mst.model.SentenceQuery.SentenceQueryInput;
+import com.mst.model.SentenceQuery.SentenceQueryInstance;
 import com.mst.model.SentenceQuery.SentenceQueryResult;
 import com.mst.model.SentenceQuery.SentenceQueryTextInput;
 import com.mst.model.SentenceQuery.SentenceReprocessingInput;
@@ -65,6 +69,7 @@ public class SentenceServiceImpl implements SentenceService {
 	private DiscreteDataInputProcesser discreteDataInputProcesser;
 	private DiscreteDataDao discreteDataDao;
 	private DiscreteDataDuplicationIdentifier discreteDataDuplicationIdentifier;
+	private SentenceQueryConverter queryConverter; 
 	
 	public SentenceServiceImpl(){
 		mongoProvider = new SentenceServiceMongoDatastoreProvider();
@@ -79,6 +84,7 @@ public class SentenceServiceImpl implements SentenceService {
 		discreteDataDao = new DiscreteDataDaoImpl();
 		discreteDataDao.setMongoDatastoreProvider(mongoProvider);
 		discreteDataDuplicationIdentifier = new DiscreteDataDuplicationIdentifierImpl();
+		queryConverter = new SentenceQueryConverterImpl();
 	}
 	
 	private void processQueryDiscreteData(List<SentenceQueryResult> results){
@@ -96,10 +102,21 @@ public class SentenceServiceImpl implements SentenceService {
 	public List<SentenceQueryResult> querySentences(SentenceQueryInput input) throws Exception{
 		if(input.getOrganizationId()==null)
 			throw new Exception("Missing OrgId");
+	
+		if(input.getIsNotAndAll())
+			input = new NotAndAllRequestFactoryImpl().create(input);
+	
+		SentenceQueryInstance stInstance = queryConverter.getSTQueryInstance(input);
+	
+		if(stInstance!=null)
+			input = queryConverter.convertST(input, stInstance,sentenceProcessingDbMetaDataInputFactory.create());
+
 		List<SentenceQueryResult> results =  sentenceQueryDao.getSentences(input);
 		processQueryDiscreteData(results);
 		return results;
 	}
+	
+	
 	
 	
 	@Override

@@ -57,8 +57,9 @@ public class RawReportController {
 				return Response.status(200).entity("Report already existed.").build(); 
 			
 			request.getDiscreteData().setRawFileId(fileId);
-			recommandationService.saveSentenceDiscoveryProcess(request);
 			service.saveParsed(fileId,request);
+			recommandationService.saveSentenceDiscoveryProcess(request);
+			
 			
 			return Response.status(200).entity("Report Saved Successfully").build(); 
 		}

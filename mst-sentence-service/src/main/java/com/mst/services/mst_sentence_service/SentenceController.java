@@ -99,10 +99,7 @@ public class SentenceController {
     @Path("/savetext")
     public Response saveText(SentenceTextRequest sentenceTextRequest){
     	try{
-    		//SaveSentenceTextResponse saveSentenceTextResponse =
     		recommandationService.saveSentenceDiscoveryProcess(sentenceTextRequest);
-//    		if(saveSentenceTextResponse!=null)
-//    			return Response.status(200).entity(saveSentenceTextResponse).build();	
 	    	return Response.status(200).entity("sentences Saved successfully").build();	
     	}
     	catch(Exception ex){
@@ -110,9 +107,6 @@ public class SentenceController {
     	}
     }
    
-    
-    
-    
     @POST
     @Path("/query")
     public Response querySentences(SentenceQueryInput input){
