@@ -108,9 +108,6 @@ public class SentenceServiceImpl implements SentenceService {
 	
 		SentenceQueryInstance stInstance = queryConverter.getSTQueryInstance(input);
 	
-		if(stInstance!=null)
-			input = queryConverter.convertST(input, stInstance,sentenceProcessingDbMetaDataInputFactory.create());
-
 		List<SentenceQueryResult> results =  sentenceQueryDao.getSentences(input);
 		processQueryDiscreteData(results);
 		return results;
@@ -119,13 +116,9 @@ public class SentenceServiceImpl implements SentenceService {
 	
 	
 	
-	@Override
+
 	public List<SentenceQueryResult> queryTextSentences(SentenceQueryTextInput input) throws Exception {
-		if(input.getOrganizationId()==null)
-			throw new Exception("Missing OrgId");
-		List<SentenceQueryResult> results =  sentenceQueryDao.getSentencesByText(input);
-		//processQueryDiscreteData(results);
-		return results;
+		return null;
 	}
 
 	public void saveSentences(List<Sentence> sentences, DiscreteData discreteData, SentenceProcessingFailures sentenceProcessingFailures,boolean isReprocess, String reprocessId, String resultType){

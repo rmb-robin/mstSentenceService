@@ -13,6 +13,7 @@ import com.mst.interfaces.dao.Hl7DetailsDao;
 import com.mst.interfaces.dao.RejectedReportDao;
 import com.mst.model.HL7Details;
 import com.mst.model.discrete.DiscreteData;
+import com.mst.model.raw.AllHl7Elements;
 import com.mst.model.requests.RejectedReport;
 import com.mst.sentenceprocessing.interfaces.ReportsService;
 import com.mst.sentenceprocessing.models.ReportSummaryRequest;
@@ -57,5 +58,9 @@ public class ReportsServiceImpl implements ReportsService {
 
 	public List<HL7Details> getHL7DetailsByOrgName(String orgName) {
 		return hl7DetailsDao.getByOrgName(orgName);
+	}
+	
+	public AllHl7Elements getAllHl7Elements(){
+		return hl7DetailsDao.getAllElements();
 	}
 }

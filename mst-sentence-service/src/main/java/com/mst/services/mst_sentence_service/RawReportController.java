@@ -5,7 +5,11 @@ import java.util.List;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
+
+import org.eclipse.persistence.internal.jpa.parsing.AliasableNode;
+
 import com.mst.model.HL7Details;
+import com.mst.model.raw.AllHl7Elements;
 import com.mst.model.raw.ParseHl7Result;
 import com.mst.model.raw.RawReportFile;
 import com.mst.model.requests.RejectedReport;
@@ -36,12 +40,23 @@ public class RawReportController {
 			if(detailsList.isEmpty()) throw new Exception("Missing Hl7 Details");
 			HL7Details details = detailsList.get(0);	
 			
-			ParseHl7Result parsedResult = service.getSetentenceTextRequestFromRaw(details, file);
+			AllHl7Elements allHl7Elements= reportsService.getAllHl7Elements();
+			
+			ParseHl7Result parsedResult = service.getSetentenceTextRequestFromRaw(details, file,allHl7Elements);
 			SentenceTextRequest request= parsedResult.getSentenceTextRequest();
+	
 			
 			request.getDiscreteData().setOrganizationId(file.getOrgId());
+			request.getDiscreteData().setAllAvailableFields(parsedResult.getAllFields());
 			RawFileSaveResult rawFileSaveResult = service.save(request,file);
 			String fileId = rawFileSaveResult.getFileId();
+			
+			if(rawFileSaveResult.isDuplicate()) 
+				return Response.status(200).entity("Report already existed.").build();
+			
+			request.getDiscreteData().setRawFileId(fileId);
+			service.saveParsed(fileId,request);
+		
 			if(!parsedResult.getMissingFields().isEmpty()) {
 				RejectedReport rejectedReport = new RejectedReport();
 				rejectedReport.setAccessionNumber(request.getDiscreteData().getAccessionNumber());
@@ -52,12 +67,8 @@ public class RawReportController {
 				reportsService.saveRejectedReport(rejectedReport);
 				return Response.status(400).entity("Rejected Report").build();
 			}	
-			
-			if(rawFileSaveResult.isDuplicate()) 
-				return Response.status(200).entity("Report already existed.").build(); 
-			
-			request.getDiscreteData().setRawFileId(fileId);
-			service.saveParsed(fileId,request);
+
+			request.getDiscreteData().getAllAvailableFields().clear();
 			recommandationService.saveSentenceDiscoveryProcess(request);
 			
 			

@@ -10,8 +10,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
-
-import com.mst.filter.NotAndAllRequestFactoryImpl;
 import com.mst.interfaces.sentenceprocessing.DiscreteDataNormalizer;
 import com.mst.model.SentenceQuery.SentenceQueryInput;
 import com.mst.model.SentenceQuery.SentenceQueryResult;
@@ -99,7 +97,9 @@ public class SentenceController {
     @Path("/savetext")
     public Response saveText(SentenceTextRequest sentenceTextRequest){
     	try{
-    		recommandationService.saveSentenceDiscoveryProcess(sentenceTextRequest);
+    		
+    		sentenceService.processSentenceTextRequest(sentenceTextRequest);
+    		//recommandationService.saveSentenceDiscoveryProcess(sentenceTextRequest);
 	    	return Response.status(200).entity("sentences Saved successfully").build();	
     	}
     	catch(Exception ex){
@@ -151,8 +151,8 @@ public class SentenceController {
     @Path("/testandnotall")
     public Response testAndNotAll(SentenceQueryInput input){
     	try{
-    		SentenceQueryInput result = new NotAndAllRequestFactoryImpl().create(input);
-    		return Response.status(200).entity(result).build();
+    		//SentenceQueryInput result = new NotAndAllRequestFactoryImpl().create(input);
+    		return Response.status(200).entity("").build();
     	}
     	catch(Exception ex){
     		return Response.status(500).entity(ex.getMessage()).build();

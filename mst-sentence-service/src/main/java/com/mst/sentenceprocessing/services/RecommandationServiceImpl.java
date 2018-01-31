@@ -53,6 +53,8 @@ public class RecommandationServiceImpl implements RecommandationService {
 	private FriendOfFriendService friendOfFriendService;
 	private RecommendedNounPhraseProcesser nounPhraseProcesser;
 	
+	private static SentenceProcessingMetaDataInput input; 
+	
 	public RecommandationServiceImpl() {
 		sentenceDiscoveryProcessor = new SentenceDiscoveryProcessorImpl();
 		mongoProvider = new SentenceServiceMongoDatastoreProvider();
@@ -74,6 +76,8 @@ public class RecommandationServiceImpl implements RecommandationService {
 	}
 
 	private void saveRecommandedTokenRelationships(List<SentenceDiscovery> sentenceDiscoveries,List<RecommendedTokenRelationship> existing, SentenceProcessingMetaDataInput input) {
+
+		
 		List<RecommendedTokenRelationship> allEdges = getAllRecommendTokenRelationships(sentenceDiscoveries,existing);
 		nounPhraseProcesser.setNamedEdges(allEdges, input.getNounRelationshipsInput());
 		recommendedTokenRelationshipDao.saveCollection(allEdges);
@@ -198,7 +202,9 @@ public class RecommandationServiceImpl implements RecommandationService {
 
 	@Override
 	public void saveSentenceDiscoveryProcess(SentenceTextRequest request) throws Exception {
-		SentenceProcessingMetaDataInput input = sentenceProcessingDbMetaDataInputFactory.create();
+		if(input == null)
+			input = sentenceProcessingDbMetaDataInputFactory.create();
+		
 		List<SentenceDiscovery> sentenceDiscoveries =  this.createSentenceDiscovery(request,input);
 		List<RecommendedTokenRelationship> existing = recommendedTokenRelationshipDao.queryByKey(getkeys(sentenceDiscoveries));
 		this.saveRecommandedTokenRelationships(sentenceDiscoveries,existing,input);

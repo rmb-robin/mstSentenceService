@@ -10,6 +10,7 @@ import com.mst.interfaces.MongoDatastoreProvider;
 import com.mst.interfaces.dao.HL7ParsedRequstDao;
 import com.mst.jsonSerializers.HL7Parser;
 import com.mst.model.HL7Details;
+import com.mst.model.raw.AllHl7Elements;
 import com.mst.model.raw.HL7ParsedRequst;
 import com.mst.model.raw.ParseHl7Result;
 import com.mst.model.raw.RawReportFile;
@@ -55,9 +56,9 @@ public class RawReportServiceImpl implements RawReportService {
 		return result;
 	}
 
-	public ParseHl7Result getSetentenceTextRequestFromRaw(HL7Details detail,RawReportFile file) throws HL7Exception{
+	public ParseHl7Result getSetentenceTextRequestFromRaw(HL7Details detail,RawReportFile file, AllHl7Elements allElements) throws HL7Exception{
 		HL7Parser parser = new HL7Parser();
-		return parser.run(detail,file.getContent(),file.getOrgName());
+		return parser.run(detail,file.getContent(),file.getOrgName(), allElements);
 	}
 
 	@Override
