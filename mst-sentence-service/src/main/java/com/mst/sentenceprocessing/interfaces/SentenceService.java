@@ -6,6 +6,7 @@ import com.mst.model.SentenceQuery.SentenceQueryResult;
 import com.mst.model.SentenceQuery.SentenceQueryTextInput;
 import com.mst.model.SentenceQuery.SentenceReprocessingInput;
 import com.mst.model.discrete.DiscreteData;
+import com.mst.model.metadataTypes.EdgeNames;
 import com.mst.model.requests.RejectedReport;
 import com.mst.model.requests.SentenceRequest;
 import com.mst.model.requests.SentenceTextRequest;
@@ -14,6 +15,7 @@ import com.mst.model.sentenceProcessing.SentenceDb;
 import com.mst.model.sentenceProcessing.SentenceProcessingFailures;
 import com.mst.model.sentenceProcessing.SentenceProcessingMetaDataInput;
 import com.mst.model.sentenceProcessing.SentenceProcessingResult;
+import com.mst.sentenceprocessing.models.Edges;
 import com.mst.sentenceprocessing.models.SaveSentenceTextResponse;
 
 
@@ -29,4 +31,6 @@ public interface SentenceService {
 	String reprocessSentences(SentenceReprocessingInput input);
 	void reprocessDiscreteData(String id);
 	SaveSentenceTextResponse processSentenceTextRequest(SentenceTextRequest request) throws Exception;
+	void saveEdges(Edges edges);
+	List<String> getSentenceTextForDiscreteDataId(String discreteDataId);
 }

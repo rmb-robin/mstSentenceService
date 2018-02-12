@@ -12,6 +12,7 @@ import java.util.UUID;
 import javax.ws.rs.core.Response;
 
 import org.bson.types.ObjectId;
+import org.glassfish.hk2.api.PreDestroy;
 
 import com.mst.dao.DisceteDataComplianceDisplayFieldsDaoImpl;
 import com.mst.dao.DiscreteDataDaoImpl;
@@ -40,6 +41,7 @@ import com.mst.model.discrete.DisceteDataComplianceDisplayFields;
 import com.mst.model.discrete.DiscreteData;
 import com.mst.model.discrete.DiscreteDataBucketIdentifierResult;
 import com.mst.model.metadataTypes.DiscreteDataBucketIdenticationType;
+import com.mst.model.metadataTypes.EdgeNames;
 import com.mst.model.requests.SentenceRequest;
 import com.mst.model.requests.SentenceTextRequest;
 import com.mst.model.sentenceProcessing.Sentence;
@@ -55,11 +57,12 @@ import com.mst.sentenceprocessing.SentenceConverter;
 import com.mst.sentenceprocessing.SentenceProcessingControllerImpl;
 import com.mst.sentenceprocessing.dao.SentenceProcessingDbMetaDataInputFactory;
 import com.mst.sentenceprocessing.interfaces.SentenceService;
+import com.mst.sentenceprocessing.models.Edges;
 import com.mst.sentenceprocessing.models.SaveSentenceTextResponse;
 import com.mst.services.mst_sentence_service.Constants;
 import com.mst.services.mst_sentence_service.SentenceServiceMongoDatastoreProvider;
 
-public class SentenceServiceImpl implements SentenceService {
+public class SentenceServiceImpl implements SentenceService,PreDestroy {
 
 	private SentenceQueryDao sentenceQueryDao; 
 	private SentenceDao sentenceDao;
@@ -108,15 +111,14 @@ public class SentenceServiceImpl implements SentenceService {
 	
 		SentenceQueryInstance stInstance = queryConverter.getSTQueryInstance(input);
 	
+//		if(stInstance!=null)
+//			input = queryConverter.convertST(input, stInstance,sentenceProcessingDbMetaDataInputFactory.create());
+//		
 		List<SentenceQueryResult> results =  sentenceQueryDao.getSentences(input);
 		processQueryDiscreteData(results);
 		return results;
 	}
 	
-	
-	
-	
-
 	public List<SentenceQueryResult> queryTextSentences(SentenceQueryTextInput input) throws Exception {
 		return null;
 	}
@@ -210,7 +212,9 @@ public class SentenceServiceImpl implements SentenceService {
 
 	
 	public List<String> getEdgeNamesForTokens(List<String> tokens) {
-		return sentenceQueryDao.getEdgeNamesByTokens(tokens);
+		Edges edges =  this.mongoProvider.getDefaultDb().createQuery(Edges.class).get();
+		return edges.getNames();
+		//return sentenceQueryDao.getEdgeNamesByTokens(tokens);
 	}
 
 	@Override
@@ -246,5 +250,24 @@ public class SentenceServiceImpl implements SentenceService {
     	return null;
 	}
 
+	@Override
+	public void preDestroy() {
+//		mongoProvider.shutDown();
+	}
 
+	@Override
+	public void saveEdges(Edges edges) {
+		this.mongoProvider.getDefaultDb().save(edges);
+	}
+
+	@Override
+	public List<String> getSentenceTextForDiscreteDataId(String discreteDataId) {
+		List<SentenceDb> sentences = sentenceQueryDao.getSentencesForDiscreteDataId(discreteDataId);
+		List<String> result = new ArrayList<>();
+		
+		for(SentenceDb sentenceDb: sentences){
+			result.add(sentenceDb.getOrigSentence());
+		}
+		return result;
+	}
 }

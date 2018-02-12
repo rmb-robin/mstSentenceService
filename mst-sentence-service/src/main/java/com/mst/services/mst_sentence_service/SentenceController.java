@@ -27,6 +27,7 @@ import com.mst.model.sentenceProcessing.SentenceProcessingResult;
 import com.mst.sentenceprocessing.DiscreteDataNormalizerImpl;
 import com.mst.sentenceprocessing.interfaces.RecommandationService;
 import com.mst.sentenceprocessing.interfaces.SentenceService;
+import com.mst.sentenceprocessing.models.Edges;
 import com.mst.sentenceprocessing.models.SaveSentenceTextResponse;
 import com.mst.sentenceprocessing.services.RecommandationServiceImpl;
 import com.mst.sentenceprocessing.services.SaveSentenceTextResponseFactory;
@@ -55,6 +56,19 @@ public class SentenceController {
     		return Response.status(500).entity(ex.getMessage()).build();
     	}
 	}
+	
+	@POST
+	@Path("/saveedges")
+	public Response getEdgeNamesForTokens(Edges edges){
+		try{
+			 sentenceService.saveEdges(edges);
+			return Response.status(200).entity(edges).build();
+		}
+		catch(Exception ex){
+    		return Response.status(500).entity(ex.getMessage()).build();
+    	}
+	}
+	
 	
     @POST
 	@Path("/save")
@@ -97,9 +111,8 @@ public class SentenceController {
     @Path("/savetext")
     public Response saveText(SentenceTextRequest sentenceTextRequest){
     	try{
-    		
-    		sentenceService.processSentenceTextRequest(sentenceTextRequest);
-    		//recommandationService.saveSentenceDiscoveryProcess(sentenceTextRequest);
+    	//	sentenceService.processSentenceTextRequest(sentenceTextRequest);
+    		recommandationService.saveSentenceDiscoveryProcess(sentenceTextRequest);
 	    	return Response.status(200).entity("sentences Saved successfully").build();	
     	}
     	catch(Exception ex){
@@ -139,7 +152,18 @@ public class SentenceController {
     }
     
     
-    
+    @GET
+    @Path("/getsentencetextfordiscreteid/{id}")
+    public Response getSentenceTextForDiscreteId(@PathParam("id") String id){
+    	try{
+	    	List<String> queryResults = sentenceService.getSentenceTextForDiscreteDataId(id);
+	    	return Response.status(200).entity(queryResults).build(); 
+    	}
+    	catch(Exception ex){
+    		return Response.status(500).entity(ex.getMessage()).build();
+    	}
+    }
+
     @GET
     @Path("processingdata")
     public Response getProcessingData(){
