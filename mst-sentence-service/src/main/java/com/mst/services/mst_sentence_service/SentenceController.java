@@ -111,8 +111,8 @@ public class SentenceController {
     @Path("/savetext")
     public Response saveText(SentenceTextRequest sentenceTextRequest){
     	try{
-    	//	sentenceService.processSentenceTextRequest(sentenceTextRequest);
-    		recommandationService.saveSentenceDiscoveryProcess(sentenceTextRequest);
+    		sentenceService.processSentenceTextRequest(sentenceTextRequest);
+    	//	recommandationService.saveSentenceDiscoveryProcess(sentenceTextRequest);
 	    	return Response.status(200).entity("sentences Saved successfully").build();	
     	}
     	catch(Exception ex){

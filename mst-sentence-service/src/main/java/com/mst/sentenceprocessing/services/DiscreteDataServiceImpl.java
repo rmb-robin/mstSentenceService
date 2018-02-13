@@ -56,17 +56,10 @@ public class DiscreteDataServiceImpl implements DiscreteDataService {
 	private void updateWithSentences(List<DiscreteDataResult> discreteDataResults){
 		Set<String> discreteDataIds = new HashSet<>();
 		discreteDataResults.forEach(a-> discreteDataIds.add(a.getDiscreteData().getId().toString()));
-		List<SentenceDb> documents = sentenceQueryDao.getSentencesByDiscreteDataIds(discreteDataIds);
-		List<Sentence> sentences = SentenceConverter.convertToSentence(documents,true,true,true);
-		
-		Map<String,List<Sentence>> sentencesByDiscreteDataId = SentenceByDiscreteDataMapper.groupSentencesByDiscretedata(sentences);
 		
 		for(DiscreteDataResult result: discreteDataResults){
-			String key = result.getDiscreteData().getId().toString();
-			if(sentencesByDiscreteDataId.containsKey(key)){
-				List<Sentence> matchedSentences = sentencesByDiscreteDataId.get(key);
-				result.setSentences(getSentenceText(matchedSentences));
-			}
+			List<SentenceDb> sentencedbs = sentenceQueryDao.getSentencesForDiscreteDataId(result.getDiscreteData().getId().toString());
+			sentencedbs.forEach(a-> result.getSentences().add(a.getOrigSentence()));
 		}	
 	}
 
@@ -78,14 +71,10 @@ public class DiscreteDataServiceImpl implements DiscreteDataService {
 	
 	@Override
 	public DiscreteDataResult getById(String id) {
-		Set<String> ids = new HashSet<String>();
-		ids.add(id);
-		List<DiscreteData> discreteDatas = dao.getByIds(ids);
-		if(discreteDatas==null || discreteDatas.isEmpty())return null;
-		DiscreteData discreteData = discreteDatas.get(0);
+		DiscreteData discreteData = dao.getbyid(id);
 		DiscreteDataResult result = new DiscreteDataResult();
 		result.setDiscreteData(discreteData);
-		List<SentenceDb> documents = sentenceQueryDao.getSentencesByDiscreteDataIds(ids);
+		List<SentenceDb> documents = sentenceQueryDao.getSentencesForDiscreteDataId(id);
 		
 		if(documents==null || documents.isEmpty()) return result;
 		documents.forEach(a-> result.getSentences().add(a.getOrigSentence()));
