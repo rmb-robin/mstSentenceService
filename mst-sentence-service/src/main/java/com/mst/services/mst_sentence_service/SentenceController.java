@@ -1,48 +1,40 @@
 package com.mst.services.mst_sentence_service;
 
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
-import com.mst.interfaces.sentenceprocessing.DiscreteDataNormalizer;
 import com.mst.model.SentenceQuery.SentenceQueryInput;
 import com.mst.model.SentenceQuery.SentenceQueryResult;
 import com.mst.model.SentenceQuery.SentenceQueryTextInput;
 import com.mst.model.SentenceQuery.SentenceReprocessingInput;
-import com.mst.model.discrete.DiscreteData;
 import com.mst.model.metadataTypes.DiscreteDataBucketIdenticationType;
-import com.mst.model.requests.RejectedReport;
 import com.mst.model.requests.SentenceRequest;
 import com.mst.model.requests.SentenceTextRequest;
 import com.mst.model.sentenceProcessing.Sentence;
-import com.mst.model.sentenceProcessing.SentenceDb;
 import com.mst.model.sentenceProcessing.SentenceProcessingMetaDataInput;
-import com.mst.model.sentenceProcessing.SentenceProcessingResult;
-import com.mst.sentenceprocessing.DiscreteDataNormalizerImpl;
 import com.mst.sentenceprocessing.interfaces.RecommandationService;
+import com.mst.sentenceprocessing.interfaces.QueryService;
 import com.mst.sentenceprocessing.interfaces.SentenceService;
 import com.mst.sentenceprocessing.models.Edges;
-import com.mst.sentenceprocessing.models.SaveSentenceTextResponse;
 import com.mst.sentenceprocessing.models.TextResponse;
 import com.mst.sentenceprocessing.services.RecommandationServiceImpl;
-import com.mst.sentenceprocessing.services.SaveSentenceTextResponseFactory;
+import com.mst.sentenceprocessing.services.QueryServiceImpl;
 import com.mst.sentenceprocessing.services.SentenceServiceImpl;
-import org.apache.log4j.Logger;
 
 @Path("sentence")
 public class SentenceController {
 
-	private SentenceService sentenceService; 
-	private RecommandationService recommandationService;
+	private final SentenceService sentenceService; 
+	private final QueryService queryService;
+	private final RecommandationService recommandationService;
 	
 	public SentenceController() {
 		sentenceService = new SentenceServiceImpl();
+		queryService = new QueryServiceImpl();
 		recommandationService = new RecommandationServiceImpl();
 	}
 
@@ -139,13 +131,14 @@ public class SentenceController {
     @Path("/query")
     public Response querySentences(SentenceQueryInput input){
     	try{
-	    	List<SentenceQueryResult> queryResults = sentenceService.querySentences(input);
+	    	List<SentenceQueryResult> queryResults = queryService.querySentences(input);
 	    	SentenceQueryOutput result = new SentenceQueryOutput();
 	    	result.setSentenceQueryResults(queryResults);
 	    	result.setSize(queryResults.size());
-    	return Response.status(200).entity(result).build(); 
+	    	return Response.status(200).entity(result).build(); 
     	}
     	catch(Exception ex){
+    		ex.printStackTrace();
     		return Response.status(500).entity(ex.getMessage()).build();
     	}
     }
@@ -155,13 +148,14 @@ public class SentenceController {
     @Path("/querytext")
     public Response queryTextSentences(SentenceQueryTextInput input){
     	try{
-	    	List<SentenceQueryResult> queryResults = sentenceService.queryTextSentences(input);
+	    	List<SentenceQueryResult> queryResults = queryService.queryTextSentences(input);
 	    	SentenceQueryOutput result = new SentenceQueryOutput();
 	    	result.setSentenceQueryResults(queryResults);
 	    	result.setSize(queryResults.size());
-    	return Response.status(200).entity(result).build(); 
+	    	return Response.status(200).entity(result).build(); 
     	}
     	catch(Exception ex){
+    		ex.printStackTrace();
     		return Response.status(500).entity(ex.getMessage()).build();
     	}
     }
