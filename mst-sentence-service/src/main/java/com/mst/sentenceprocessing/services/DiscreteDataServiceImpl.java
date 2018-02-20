@@ -71,7 +71,7 @@ public class DiscreteDataServiceImpl implements DiscreteDataService {
 	
 	@Override
 	public DiscreteDataResult getById(String id) {
-		DiscreteData discreteData = dao.getbyid(id);
+		DiscreteData discreteData = dao.get(id);
 		DiscreteDataResult result = new DiscreteDataResult();
 		result.setDiscreteData(discreteData);
 		List<SentenceDb> documents = sentenceQueryDao.getSentencesForDiscreteDataId(id);

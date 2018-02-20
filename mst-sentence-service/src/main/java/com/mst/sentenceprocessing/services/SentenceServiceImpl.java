@@ -148,7 +148,7 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 
 	
 	public String reprocessSentences(SentenceReprocessingInput input) {
-		controller.setMetadata(sentenceProcessingDbMetaDataInputFactory.create());
+		controller.setMetadata(sentenceProcessingDbMetaDataInputFactory.create(true));
 		String reprocessId = UUID.randomUUID().toString();
 		input.setReprocessId(reprocessId);
 		
@@ -197,16 +197,16 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 	}
 	
 	public List<Sentence> createSentences(SentenceRequest request) throws Exception{
-    	controller.setMetadata(sentenceProcessingDbMetaDataInputFactory.create());
+    	controller.setMetadata(sentenceProcessingDbMetaDataInputFactory.create(true));
     	return controller.processSentences(request);
 	}
 	
 	public SentenceProcessingMetaDataInput getSentenceProcessingMetadata(){
-		return sentenceProcessingDbMetaDataInputFactory.create();
+		return sentenceProcessingDbMetaDataInputFactory.create(true);
 	}
 
 	public SentenceProcessingResult createSentences(SentenceTextRequest request) throws Exception {
-		controller.setMetadata(sentenceProcessingDbMetaDataInputFactory.create());
+		controller.setMetadata(sentenceProcessingDbMetaDataInputFactory.create(true));
 		return controller.processText(request);
 	}
 

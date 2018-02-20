@@ -203,7 +203,7 @@ public class RecommandationServiceImpl implements RecommandationService {
 	@Override
 	public void saveSentenceDiscoveryProcess(SentenceTextRequest request) throws Exception {
 		if(input == null)
-			input = sentenceProcessingDbMetaDataInputFactory.create();
+			input = sentenceProcessingDbMetaDataInputFactory.create(false);
 		
 		List<SentenceDiscovery> sentenceDiscoveries =  this.createSentenceDiscovery(request,input);
 		List<RecommendedTokenRelationship> existing = recommendedTokenRelationshipDao.queryByKey(getkeys(sentenceDiscoveries));

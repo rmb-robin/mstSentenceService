@@ -20,10 +20,10 @@ public class SentenceProcessingDbMetaDataInputFactory implements SentenceProcess
 	}
 
 	@Override
-	public SentenceProcessingMetaDataInput create() {
+	public SentenceProcessingMetaDataInput create(boolean isSentenceProcessing) {
 		Query<SentenceProcessingMetaDataInput> query = mongoProvider.getDefaultDb().createQuery(SentenceProcessingMetaDataInput.class);
-		List<SentenceProcessingMetaDataInput> lst =  query.asList();		
-		SentenceProcessingMetaDataInput meta =  lst.get(0);
+		query.field("isSentenceProcessing").equal(isSentenceProcessing);	
+		SentenceProcessingMetaDataInput meta =  query.get();
 		meta.setDynamicEdgeCreationRules(getRules());
 		return meta;
 	}
