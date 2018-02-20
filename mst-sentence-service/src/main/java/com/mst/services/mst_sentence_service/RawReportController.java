@@ -20,6 +20,7 @@ import com.mst.sentenceprocessing.interfaces.RecommandationService;
 import com.mst.sentenceprocessing.interfaces.ReportsService;
 import com.mst.sentenceprocessing.interfaces.SentenceService;
 import com.mst.sentenceprocessing.models.RawFileSaveResult;
+import com.mst.sentenceprocessing.models.TextResponse;
 import com.mst.sentenceprocessing.services.RawReportServiceImpl;
 import com.mst.sentenceprocessing.services.RecommandationServiceImpl;
 import com.mst.sentenceprocessing.services.ReportsServiceImpl;
@@ -31,6 +32,7 @@ public class RawReportController {
 	private RawReportService service = new RawReportServiceImpl();
 	private ReportsService reportsService = new ReportsServiceImpl();
 	private RecommandationService recommandationService = new RecommandationServiceImpl();
+	private SentenceService sentenceService = new SentenceServiceImpl(); 
 	
 	@POST
 	@Path("/save")
@@ -69,13 +71,16 @@ public class RawReportController {
 			}	
 
 			request.getDiscreteData().getAllAvailableFields().clear();
-			recommandationService.saveSentenceDiscoveryProcess(request);
-			
+//			recommandationService.saveSentenceDiscoveryProcess(request);
+			sentenceService.processSentenceTextRequest(request);		
 			
 			return Response.status(200).entity("Report Saved Successfully").build(); 
 		}
-		catch(Exception ex){
-			return Response.status(500).entity(ex.toString()).build();
+		catch(Exception ex){ 
+			TextResponse response = new TextResponse();
+			response.setResult("error");
+			response.setMessage(ex.getMessage());
+			return Response.status(500).entity(response).build();
 		}
 	}
 }

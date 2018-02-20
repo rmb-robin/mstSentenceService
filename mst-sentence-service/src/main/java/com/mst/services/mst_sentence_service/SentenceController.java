@@ -27,7 +27,9 @@ import com.mst.model.sentenceProcessing.SentenceProcessingResult;
 import com.mst.sentenceprocessing.DiscreteDataNormalizerImpl;
 import com.mst.sentenceprocessing.interfaces.RecommandationService;
 import com.mst.sentenceprocessing.interfaces.SentenceService;
+import com.mst.sentenceprocessing.models.Edges;
 import com.mst.sentenceprocessing.models.SaveSentenceTextResponse;
+import com.mst.sentenceprocessing.models.TextResponse;
 import com.mst.sentenceprocessing.services.RecommandationServiceImpl;
 import com.mst.sentenceprocessing.services.SaveSentenceTextResponseFactory;
 import com.mst.sentenceprocessing.services.SentenceServiceImpl;
@@ -55,6 +57,19 @@ public class SentenceController {
     		return Response.status(500).entity(ex.getMessage()).build();
     	}
 	}
+	
+	@POST
+	@Path("/saveedges")
+	public Response getEdgeNamesForTokens(Edges edges){
+		try{
+			 sentenceService.saveEdges(edges);
+			return Response.status(200).entity(edges).build();
+		}
+		catch(Exception ex){
+    		return Response.status(500).entity(ex.getMessage()).build();
+    	}
+	}
+	
 	
     @POST
 	@Path("/save")
@@ -97,13 +112,26 @@ public class SentenceController {
     @Path("/savetext")
     public Response saveText(SentenceTextRequest sentenceTextRequest){
     	try{
-    		
-    		sentenceService.processSentenceTextRequest(sentenceTextRequest);
-    		//recommandationService.saveSentenceDiscoveryProcess(sentenceTextRequest);
-	    	return Response.status(200).entity("sentences Saved successfully").build();	
+    		if(sentenceTextRequest.getIsSentenceRequest()){
+    			sentenceService.processSentenceTextRequest(sentenceTextRequest);
+    			TextResponse response = new TextResponse();
+    			response.setMessage("sentences Saved");
+    			response.setResult("successful");
+    			return Response.status(200).entity(response).build();	
+    		}
+    		else{
+    			recommandationService.saveSentenceDiscoveryProcess(sentenceTextRequest);
+    			TextResponse response = new TextResponse();
+    			response.setMessage("sentences discoveries Saved");
+    			response.setResult("successful");
+    			return Response.status(200).entity(response).build();	
+    		}
     	}
     	catch(Exception ex){
-    		return Response.status(500).entity(ex.getMessage()).build();
+    		TextResponse response = new TextResponse();
+			response.setMessage(ex.getMessage());
+			response.setResult("error");
+			return Response.status(200).entity(response).build();	
     	}
     }
    
@@ -139,7 +167,18 @@ public class SentenceController {
     }
     
     
-    
+    @GET
+    @Path("/getsentencetextfordiscreteid/{id}")
+    public Response getSentenceTextForDiscreteId(@PathParam("id") String id){
+    	try{
+	    	List<String> queryResults = sentenceService.getSentenceTextForDiscreteDataId(id);
+	    	return Response.status(200).entity(queryResults).build(); 
+    	}
+    	catch(Exception ex){
+    		return Response.status(500).entity(ex.getMessage()).build();
+    	}
+    }
+
     @GET
     @Path("processingdata")
     public Response getProcessingData(){
