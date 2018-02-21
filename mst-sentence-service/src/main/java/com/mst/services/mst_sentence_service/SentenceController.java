@@ -1,6 +1,5 @@
 package com.mst.services.mst_sentence_service;
 
-
 import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -15,7 +14,10 @@ import com.mst.model.metadataTypes.DiscreteDataBucketIdenticationType;
 import com.mst.model.requests.SentenceRequest;
 import com.mst.model.requests.SentenceTextRequest;
 import com.mst.model.sentenceProcessing.Sentence;
+import com.mst.model.sentenceProcessing.SentenceDb;
 import com.mst.model.sentenceProcessing.SentenceProcessingMetaDataInput;
+import com.mst.model.sentenceProcessing.TokenRelationship;
+import com.mst.model.tree.TreeNode;
 import com.mst.sentenceprocessing.interfaces.RecommandationService;
 import com.mst.sentenceprocessing.interfaces.QueryService;
 import com.mst.sentenceprocessing.interfaces.SentenceService;
@@ -24,14 +26,15 @@ import com.mst.sentenceprocessing.models.TextResponse;
 import com.mst.sentenceprocessing.services.RecommandationServiceImpl;
 import com.mst.sentenceprocessing.services.QueryServiceImpl;
 import com.mst.sentenceprocessing.services.SentenceServiceImpl;
+import com.mst.util.TokenRelationshipUtil;
 
 @Path("sentence")
 public class SentenceController {
 
-	private final SentenceService sentenceService; 
+	private final SentenceService sentenceService;
 	private final QueryService queryService;
 	private final RecommandationService recommandationService;
-	
+
 	public SentenceController() {
 		sentenceService = new SentenceServiceImpl();
 		queryService = new QueryServiceImpl();
@@ -40,155 +43,173 @@ public class SentenceController {
 
 	@POST
 	@Path("/getedgesfortokens")
-	public Response getEdgeNamesForTokens(List<String> tokens){
-		try{
+	public Response getEdgeNamesForTokens(List<String> tokens) {
+		try {
 			List<String> edges = sentenceService.getEdgeNamesForTokens(tokens);
 			return Response.status(200).entity(edges).build();
+		} catch (Exception ex) {
+			return Response.status(500).entity(ex.getMessage()).build();
 		}
-		catch(Exception ex){
-    		return Response.status(500).entity(ex.getMessage()).build();
-    	}
 	}
-	
+
 	@POST
 	@Path("/saveedges")
-	public Response getEdgeNamesForTokens(Edges edges){
-		try{
-			 sentenceService.saveEdges(edges);
+	public Response getEdgeNamesForTokens(Edges edges) {
+		try {
+			sentenceService.saveEdges(edges);
 			return Response.status(200).entity(edges).build();
+		} catch (Exception ex) {
+			return Response.status(500).entity(ex.getMessage()).build();
 		}
-		catch(Exception ex){
-    		return Response.status(500).entity(ex.getMessage()).build();
-    	}
 	}
-	
-	
-    @POST
-	@Path("/save")
-	public Response saveSentence(SentenceRequest request) throws Exception{
-    	try{
-	    	List<Sentence> sentences = sentenceService.createSentences(request);
-	    	sentenceService.saveSentences(sentences, request.getDiscreteData(),null,false,null, DiscreteDataBucketIdenticationType.compliance);
-		return Response.status(200).entity("sentences Saved successfully").build();
-    	}
-    	catch(Exception ex){
-    		return Response.status(500).entity(ex.getMessage()).build();
-    	}
-    }
 
-    @POST
+	@POST
+	@Path("/save")
+	public Response saveSentence(SentenceRequest request) throws Exception {
+		try {
+			List<Sentence> sentences = sentenceService.createSentences(request);
+			sentenceService.saveSentences(sentences, request.getDiscreteData(), null, false, null,
+					DiscreteDataBucketIdenticationType.compliance);
+			return Response.status(200).entity("sentences Saved successfully").build();
+		} catch (Exception ex) {
+			return Response.status(500).entity(ex.getMessage()).build();
+		}
+	}
+
+	@POST
 	@Path("/reprocess")
-	public Response reprocess(SentenceReprocessingInput input) throws Exception{
-    	try{
-    		String reprocessId = sentenceService.reprocessSentences(input);
-    		return Response.status(200).entity(reprocessId).build();
-    	}
-    	catch(Exception ex){
-    		return Response.status(500).entity(ex.getMessage()).build();
-    	}
-    }
-   
-    @GET
+	public Response reprocess(SentenceReprocessingInput input) throws Exception {
+		try {
+			String reprocessId = sentenceService.reprocessSentences(input);
+			return Response.status(200).entity(reprocessId).build();
+		} catch (Exception ex) {
+			return Response.status(500).entity(ex.getMessage()).build();
+		}
+	}
+
+	@GET
 	@Path("/reprocessdiscretedata/{id}")
-	public Response reprocessDiscreteData(@PathParam("id") String id) throws Exception{
-    	try{
-    		sentenceService.reprocessDiscreteData(id);
-    		return Response.status(200).entity("reprocessing successfully").build();
-    	}
-    	catch(Exception ex){
-    		return Response.status(500).entity(ex.getMessage()).build();
-    	}
-    }
-    
-    @POST
-    @Path("/savetext")
-    public Response saveText(SentenceTextRequest sentenceTextRequest){
-    	try{
-    		if(sentenceTextRequest.getIsSentenceRequest()){
-    			sentenceService.processSentenceTextRequest(sentenceTextRequest);
-    			TextResponse response = new TextResponse();
-    			response.setMessage("sentences Saved");
-    			response.setResult("successful");
-    			return Response.status(200).entity(response).build();	
-    		}
-    		else{
-    			recommandationService.saveSentenceDiscoveryProcess(sentenceTextRequest);
-    			TextResponse response = new TextResponse();
-    			response.setMessage("sentences discoveries Saved");
-    			response.setResult("successful");
-    			return Response.status(200).entity(response).build();	
-    		}
-    	}
-    	catch(Exception ex){
-    		TextResponse response = new TextResponse();
+	public Response reprocessDiscreteData(@PathParam("id") String id) throws Exception {
+		try {
+			sentenceService.reprocessDiscreteData(id);
+			return Response.status(200).entity("reprocessing successfully").build();
+		} catch (Exception ex) {
+			return Response.status(500).entity(ex.getMessage()).build();
+		}
+	}
+
+	@POST
+	@Path("/savetext")
+	public Response saveText(SentenceTextRequest sentenceTextRequest) {
+		try {
+			if (sentenceTextRequest.getIsSentenceRequest()) {
+				sentenceService.processSentenceTextRequest(sentenceTextRequest);
+				TextResponse response = new TextResponse();
+				response.setMessage("sentences Saved");
+				response.setResult("successful");
+				return Response.status(200).entity(response).build();
+			} else {
+				recommandationService.saveSentenceDiscoveryProcess(sentenceTextRequest);
+				TextResponse response = new TextResponse();
+				response.setMessage("sentences discoveries Saved");
+				response.setResult("successful");
+				return Response.status(200).entity(response).build();
+			}
+		} catch (Exception ex) {
+			TextResponse response = new TextResponse();
 			response.setMessage(ex.getMessage());
 			response.setResult("error");
-			return Response.status(200).entity(response).build();	
-    	}
-    }
-   
-    @POST
-    @Path("/query")
-    public Response querySentences(SentenceQueryInput input){
-    	try{
-	    	List<SentenceQueryResult> queryResults = queryService.querySentences(input);
-	    	SentenceQueryOutput result = new SentenceQueryOutput();
-	    	result.setSentenceQueryResults(queryResults);
-	    	result.setSize(queryResults.size());
-	    	return Response.status(200).entity(result).build(); 
-    	}
-    	catch(Exception ex){
-    		ex.printStackTrace();
-    		return Response.status(500).entity(ex.getMessage()).build();
-    	}
-    }
-    
-    
-    @POST
-    @Path("/querytext")
-    public Response queryTextSentences(SentenceQueryTextInput input){
-    	try{
-	    	List<SentenceQueryResult> queryResults = queryService.queryTextSentences(input);
-	    	SentenceQueryOutput result = new SentenceQueryOutput();
-	    	result.setSentenceQueryResults(queryResults);
-	    	result.setSize(queryResults.size());
-	    	return Response.status(200).entity(result).build(); 
-    	}
-    	catch(Exception ex){
-    		ex.printStackTrace();
-    		return Response.status(500).entity(ex.getMessage()).build();
-    	}
-    }
-    
-    
-    @GET
-    @Path("/getsentencetextfordiscreteid/{id}")
-    public Response getSentenceTextForDiscreteId(@PathParam("id") String id){
-    	try{
-	    	List<String> queryResults = sentenceService.getSentenceTextForDiscreteDataId(id);
-	    	return Response.status(200).entity(queryResults).build(); 
-    	}
-    	catch(Exception ex){
-    		return Response.status(500).entity(ex.getMessage()).build();
-    	}
-    }
+			return Response.status(200).entity(response).build();
+		}
+	}
 
-    @GET
-    @Path("processingdata")
-    public Response getProcessingData(){
-    	SentenceProcessingMetaDataInput input = sentenceService.getSentenceProcessingMetadata();
-    	return Response.status(200).entity(input).build();
-    }
-    
-    @POST 
-    @Path("/testandnotall")
-    public Response testAndNotAll(SentenceQueryInput input){
-    	try{
-    		//SentenceQueryInput result = new NotAndAllRequestFactoryImpl().create(input);
-    		return Response.status(200).entity("").build();
-    	}
-    	catch(Exception ex){
-    		return Response.status(500).entity(ex.getMessage()).build();
-    	}
-    }
+	@GET
+	@Path("/showtokenrelationships/{id}")
+	public Response showTokenRelationships(@PathParam("id") String id) throws Exception {
+		try {
+			List<SentenceDb> sentences = sentenceService.getSentenceById(id);
+			StringBuffer sb = new StringBuffer("<pre>");
+			for (SentenceDb sentence : sentences) {
+				sb.append("\nDumping result for sentence: \"" + sentence.getOrigSentence() + "\"");
+				
+				TreeNode<TokenRelationship> root = TokenRelationshipUtil
+						.buildTokenRelationshipTree(sentence.getTokenRelationships());
+				sb.append("\n\nStandard Token Relationship Edges");
+				for (TokenRelationship relationship : sentence.getTokenRelationships()) {
+					sb.append("\n" + relationship);
+				}
+				sb.append("\n\nRoot Tree:");
+				sb.append(TokenRelationshipUtil.treeToString(root));
+//				for (TreeNode<TokenRelationship> result : root) {
+//					sb.append("\n\nMatched Node for " + ");
+//					sb.append(TokenRelationshipUtil.treeToString(result));
+//				}
+			}
+			sb.append("</pre>");
+			return Response.status(200).entity(sb.toString()).build();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return Response.status(500).entity(ex.getMessage()).build();
+		}
+	}
+
+	@POST
+	@Path("/query")
+	public Response querySentences(SentenceQueryInput input) {
+		try {
+			List<SentenceQueryResult> queryResults = queryService.querySentences(input);
+			SentenceQueryOutput result = new SentenceQueryOutput();
+			result.setSentenceQueryResults(queryResults);
+			result.setSize(queryResults.size());
+			return Response.status(200).entity(result).build();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return Response.status(500).entity(ex.getMessage()).build();
+		}
+	}
+
+	@POST
+	@Path("/querytext")
+	public Response queryTextSentences(SentenceQueryTextInput input) {
+		try {
+			List<SentenceQueryResult> queryResults = queryService.queryTextSentences(input);
+			SentenceQueryOutput result = new SentenceQueryOutput();
+			result.setSentenceQueryResults(queryResults);
+			result.setSize(queryResults.size());
+			return Response.status(200).entity(result).build();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return Response.status(500).entity(ex.getMessage()).build();
+		}
+	}
+
+	@GET
+	@Path("/getsentencetextfordiscreteid/{id}")
+	public Response getSentenceTextForDiscreteId(@PathParam("id") String id) {
+		try {
+			List<String> queryResults = sentenceService.getSentenceTextForDiscreteDataId(id);
+			return Response.status(200).entity(queryResults).build();
+		} catch (Exception ex) {
+			return Response.status(500).entity(ex.getMessage()).build();
+		}
+	}
+
+	@GET
+	@Path("processingdata")
+	public Response getProcessingData() {
+		SentenceProcessingMetaDataInput input = sentenceService.getSentenceProcessingMetadata();
+		return Response.status(200).entity(input).build();
+	}
+
+	@POST
+	@Path("/testandnotall")
+	public Response testAndNotAll(SentenceQueryInput input) {
+		try {
+			// SentenceQueryInput result = new
+			// NotAndAllRequestFactoryImpl().create(input);
+			return Response.status(200).entity("").build();
+		} catch (Exception ex) {
+			return Response.status(500).entity(ex.getMessage()).build();
+		}
+	}
 }

@@ -262,4 +262,9 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 		}
 		return result;
 	}
+
+	@Override
+	public List<SentenceDb> getSentenceById(String id) {
+		return sentenceQueryDao.getSentenceById(id) ;
+	}
 }
