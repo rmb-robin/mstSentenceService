@@ -1,7 +1,6 @@
 package com.mst.sentenceprocessing.services;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -9,39 +8,27 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.ws.rs.core.Response;
-
 import org.bson.types.ObjectId;
 import org.glassfish.hk2.api.PreDestroy;
 
-import com.mst.dao.DisceteDataComplianceDisplayFieldsDaoImpl;
 import com.mst.dao.DiscreteDataDaoImpl;
 import com.mst.dao.SentenceDaoImpl;
 import com.mst.dao.SentenceQueryDaoImpl;
 import com.mst.filter.NotAndAllRequestFactoryImpl;
-import com.mst.filter.SentenceQueryConverterImpl;
 import com.mst.interfaces.DiscreteDataDao;
 import com.mst.interfaces.MongoDatastoreProvider;
-import com.mst.interfaces.sentenceprocessing.DiscreteDataBucketIdentifier;
 import com.mst.interfaces.sentenceprocessing.DiscreteDataDuplicationIdentifier;
 import com.mst.interfaces.sentenceprocessing.DiscreteDataInputProcesser;
-import com.mst.interfaces.sentenceprocessing.DiscreteDataNormalizer;
 import com.mst.interfaces.sentenceprocessing.SentenceProcessingController;
 import com.mst.interfaces.SentenceProcessingMetaDataInputFactory;
-import com.mst.interfaces.dao.DisceteDataComplianceDisplayFieldsDao;
 import com.mst.interfaces.dao.SentenceDao;
 import com.mst.interfaces.dao.SentenceQueryDao;
-import com.mst.interfaces.filter.SentenceQueryConverter;
 import com.mst.model.SentenceQuery.SentenceQueryInput;
-import com.mst.model.SentenceQuery.SentenceQueryInstance;
 import com.mst.model.SentenceQuery.SentenceQueryResult;
 import com.mst.model.SentenceQuery.SentenceQueryTextInput;
 import com.mst.model.SentenceQuery.SentenceReprocessingInput;
-import com.mst.model.discrete.DisceteDataComplianceDisplayFields;
 import com.mst.model.discrete.DiscreteData;
-import com.mst.model.discrete.DiscreteDataBucketIdentifierResult;
 import com.mst.model.metadataTypes.DiscreteDataBucketIdenticationType;
-import com.mst.model.metadataTypes.EdgeNames;
 import com.mst.model.requests.SentenceRequest;
 import com.mst.model.requests.SentenceTextRequest;
 import com.mst.model.sentenceProcessing.Sentence;
@@ -49,17 +36,14 @@ import com.mst.model.sentenceProcessing.SentenceDb;
 import com.mst.model.sentenceProcessing.SentenceProcessingFailures;
 import com.mst.model.sentenceProcessing.SentenceProcessingMetaDataInput;
 import com.mst.model.sentenceProcessing.SentenceProcessingResult;
-import com.mst.sentenceprocessing.DiscreteDataBucketIdentifierImpl;
 import com.mst.sentenceprocessing.DiscreteDataDuplicationIdentifierImpl;
 import com.mst.sentenceprocessing.DiscreteDataInputProcesserImpl;
-import com.mst.sentenceprocessing.DiscreteDataNormalizerImpl;
 import com.mst.sentenceprocessing.SentenceConverter;
 import com.mst.sentenceprocessing.SentenceProcessingControllerImpl;
 import com.mst.sentenceprocessing.dao.SentenceProcessingDbMetaDataInputFactory;
 import com.mst.sentenceprocessing.interfaces.SentenceService;
 import com.mst.sentenceprocessing.models.Edges;
 import com.mst.sentenceprocessing.models.SaveSentenceTextResponse;
-import com.mst.services.mst_sentence_service.Constants;
 import com.mst.services.mst_sentence_service.SentenceServiceMongoDatastoreProvider;
 
 public class SentenceServiceImpl implements SentenceService,PreDestroy {
@@ -72,7 +56,7 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 	private DiscreteDataInputProcesser discreteDataInputProcesser;
 	private DiscreteDataDao discreteDataDao;
 	private DiscreteDataDuplicationIdentifier discreteDataDuplicationIdentifier;
-	private SentenceQueryConverter queryConverter; 
+//	private SentenceQueryConverter queryConverter; 
 	
 	public SentenceServiceImpl(){
 		mongoProvider = new SentenceServiceMongoDatastoreProvider();
@@ -87,7 +71,7 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 		discreteDataDao = new DiscreteDataDaoImpl();
 		discreteDataDao.setMongoDatastoreProvider(mongoProvider);
 		discreteDataDuplicationIdentifier = new DiscreteDataDuplicationIdentifierImpl();
-		queryConverter = new SentenceQueryConverterImpl();
+//		queryConverter = new SentenceQueryConverterImpl();
 	}
 	
 	private void processQueryDiscreteData(List<SentenceQueryResult> results){
@@ -102,6 +86,7 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 		discreteDataDuplicationIdentifier.process(discretaDatas);
 	}
 	
+	@Override 
 	public List<SentenceQueryResult> querySentences(SentenceQueryInput input) throws Exception{
 		if(input.getOrganizationId()==null)
 			throw new Exception("Missing OrgId");
@@ -109,7 +94,7 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 		if(input.getIsNotAndAll())
 			input = new NotAndAllRequestFactoryImpl().create(input);
 	
-		SentenceQueryInstance stInstance = queryConverter.getSTQueryInstance(input);
+//		SentenceQueryInstance stInstance = queryConverter.getSTQueryInstance(input);
 	
 //		if(stInstance!=null)
 //			input = queryConverter.convertST(input, stInstance,sentenceProcessingDbMetaDataInputFactory.create());
@@ -119,10 +104,12 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 		return results;
 	}
 	
+	@Override 
 	public List<SentenceQueryResult> queryTextSentences(SentenceQueryTextInput input) throws Exception {
 		return null;
 	}
 
+	@Override 
 	public void saveSentences(List<Sentence> sentences, DiscreteData discreteData, SentenceProcessingFailures sentenceProcessingFailures,boolean isReprocess, String reprocessId, String resultType){
 		List<SentenceDb> documents = new ArrayList<SentenceDb>();
 		for(Sentence sentence: sentences){
@@ -147,6 +134,7 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 	//move to other project...
 
 	
+	@Override 
 	public String reprocessSentences(SentenceReprocessingInput input) {
 		controller.setMetadata(sentenceProcessingDbMetaDataInputFactory.create(true));
 		String reprocessId = UUID.randomUUID().toString();
@@ -196,21 +184,25 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 		discreteData.setIsCompliant(false);
 	}
 	
+	@Override 
 	public List<Sentence> createSentences(SentenceRequest request) throws Exception{
     	controller.setMetadata(sentenceProcessingDbMetaDataInputFactory.create(true));
     	return controller.processSentences(request);
 	}
 	
+	@Override 
 	public SentenceProcessingMetaDataInput getSentenceProcessingMetadata(){
 		return sentenceProcessingDbMetaDataInputFactory.create(true);
 	}
 
+	@Override 
 	public SentenceProcessingResult createSentences(SentenceTextRequest request) throws Exception {
 		controller.setMetadata(sentenceProcessingDbMetaDataInputFactory.create(true));
 		return controller.processText(request);
 	}
 
 	
+	@Override 
 	public List<String> getEdgeNamesForTokens(List<String> tokens) {
 		Edges edges =  this.mongoProvider.getDefaultDb().createQuery(Edges.class).get();
 		return edges.getNames();
@@ -269,5 +261,10 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 			result.add(sentenceDb.getOrigSentence());
 		}
 		return result;
+	}
+
+	@Override
+	public List<SentenceDb> getSentenceById(String id) {
+		return sentenceQueryDao.getSentenceById(id) ;
 	}
 }
