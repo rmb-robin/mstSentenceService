@@ -134,29 +134,29 @@ public class SentenceController {
 	    	SentenceQueryOutput result = new SentenceQueryOutput();
 	    	result.setSentenceQueryResults(queryResults);
 	    	result.setSize(queryResults.size());
-    	return Response.status(200).entity(result).build(); 
+	    	return Response.status(200).entity(result).build(); 
     	}
     	catch(Exception ex){
     		return Response.status(500).entity(ex.getMessage()).build();
     	}
     }
-    
-    
-    @POST
-    @Path("/querytext")
-    public Response queryTextSentences(SentenceQueryTextInput input){
-    	try{
-	    	List<SentenceQueryResult> queryResults = sentenceService.queryTextSentences(input);
-	    	SentenceQueryOutput result = new SentenceQueryOutput();
-	    	result.setSentenceQueryResults(queryResults);
-	    	result.setSize(queryResults.size());
-    	return Response.status(200).entity(result).build(); 
-    	}
-    	catch(Exception ex){
-    		return Response.status(500).entity(ex.getMessage()).build();
-    	}
-    }
-    
+
+            
+	@POST
+	@Path("/querytext")
+	public Response queryTextSentences(SentenceQueryTextInput input) {
+		try {
+			List<SentenceQueryResult> queryResults = queryService.queryTextSentences(input);
+			SentenceQueryOutput result = new SentenceQueryOutput();
+			result.setSentenceQueryResults(queryResults);
+			result.setSize(queryResults.size());
+			return Response.status(200).entity(result).build();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return Response.status(500).entity(ex.getMessage()).build();
+		}
+	}
+
     
     @GET
     @Path("/getsentencetextfordiscreteid/{id}")
@@ -169,6 +169,7 @@ public class SentenceController {
     		return Response.status(500).entity(ex.getMessage()).build();
     	}
     }
+    
 
 	@GET
 	@Path("/showtokenrelationships/{id}")
@@ -200,46 +201,10 @@ public class SentenceController {
 		}
 	}
 
-	@POST
-	@Path("/query")
-	public Response querySentences(SentenceQueryInput input) {
-		try {
-			List<SentenceQueryResult> queryResults = queryService.querySentences(input);
-			SentenceQueryOutput result = new SentenceQueryOutput();
-			result.setSentenceQueryResults(queryResults);
-			result.setSize(queryResults.size());
-			return Response.status(200).entity(result).build();
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			return Response.status(500).entity(ex.getMessage()).build();
-		}
-	}
 
-	@POST
-	@Path("/querytext")
-	public Response queryTextSentences(SentenceQueryTextInput input) {
-		try {
-			List<SentenceQueryResult> queryResults = queryService.queryTextSentences(input);
-			SentenceQueryOutput result = new SentenceQueryOutput();
-			result.setSentenceQueryResults(queryResults);
-			result.setSize(queryResults.size());
-			return Response.status(200).entity(result).build();
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			return Response.status(500).entity(ex.getMessage()).build();
-		}
-	}
 
-	@GET
-	@Path("/getsentencetextfordiscreteid/{id}")
-	public Response getSentenceTextForDiscreteId(@PathParam("id") String id) {
-		try {
-			List<String> queryResults = sentenceService.getSentenceTextForDiscreteDataId(id);
-			return Response.status(200).entity(queryResults).build();
-		} catch (Exception ex) {
-			return Response.status(500).entity(ex.getMessage()).build();
-		}
-	}
+
+
 
 	@GET
 	@Path("processingdata")

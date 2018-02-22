@@ -15,13 +15,35 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.3</version>
+				<version>2.5.1</version>
 				<inherited>true</inherited>
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
 				</configuration>
-			</plugin>			
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-install-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>install-external</id>
+						<phase>clean</phase>
+						<configuration>
+							<file>${project.basedir}/lib/mst-tools-1.0.0.jar</file>
+							<repositoryLayout>default</repositoryLayout>
+							<groupId>mst-tools</groupId>
+							<artifactId>mst-tools</artifactId>
+							<version>1.0.0</version>
+							<packaging>jar</packaging>
+							<generatePom>true</generatePom>
+						</configuration>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -59,8 +81,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>MST-Tools</groupId>
-			<artifactId>MST-Tools</artifactId>
+			<groupId>mst-tools</groupId>
+			<artifactId>mst-tools</artifactId>
 			<version>1.0.0</version>
 		</dependency>
 
@@ -73,15 +95,8 @@
 		<dependency>
 			<groupId>org.mongodb.morphia</groupId>
 			<artifactId>morphia</artifactId>
-			<version>1.3.1</version>
+			<version>1.2.1</version>
 		</dependency>
-		
-		<dependency>
-			<groupId>org.mongodb</groupId>
-			<artifactId>bson</artifactId>
-			<version>3.4.2</version>
-		</dependency>
-		
 		<dependency>
 			<groupId>org.glassfish.jersey.media</groupId>
 			<artifactId>jersey-media-json-jackson</artifactId>
