@@ -112,7 +112,7 @@ public class SentenceController {
     @Path("/savetext")
     public Response saveText(SentenceTextRequest sentenceTextRequest){
     	try{
-    		if(sentenceTextRequest.getIsSentenceRequest()){
+    		if(!sentenceTextRequest.getIsProcessingtypeSentenceDiscovery()){
     			sentenceService.processSentenceTextRequest(sentenceTextRequest);
     			TextResponse response = new TextResponse();
     			response.setMessage("sentences Saved");
@@ -131,7 +131,7 @@ public class SentenceController {
     		TextResponse response = new TextResponse();
 			response.setMessage(ex.getMessage());
 			response.setResult("error");
-			return Response.status(200).entity(response).build();	
+			return Response.status(500).entity(response).build();	
     	}
     }
    
