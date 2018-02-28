@@ -72,11 +72,7 @@ public class RawReportController {
 			}	
 
 			request.getDiscreteData().getAllAvailableFields().clear();
-//			
-			if(file.getIsProcessingtypeSentenceDiscovery())
-				recommandationService.saveSentenceDiscoveryProcess(request);
-			else 
-				sentenceService.processSentenceTextRequest(request);		
+			sentenceService.processSentenceTextRequest(request);		
 			
 			return Response.status(200).entity("Report Saved Successfully").build(); 
 		}
