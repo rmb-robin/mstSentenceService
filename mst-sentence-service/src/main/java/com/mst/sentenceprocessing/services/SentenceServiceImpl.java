@@ -58,6 +58,8 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 	private DiscreteDataDuplicationIdentifier discreteDataDuplicationIdentifier;
 //	private SentenceQueryConverter queryConverter; 
 	
+	private static SentenceProcessingMetaDataInput metaDataInput;
+	
 	public SentenceServiceImpl(){
 		mongoProvider = new SentenceServiceMongoDatastoreProvider();
 		sentenceQueryDao = new SentenceQueryDaoImpl();
@@ -136,7 +138,7 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 	
 	@Override 
 	public String reprocessSentences(SentenceReprocessingInput input) {
-		controller.setMetadata(sentenceProcessingDbMetaDataInputFactory.create(true));
+		controller.setMetadata(getSentenceProcessingMetadata());
 		String reprocessId = UUID.randomUUID().toString();
 		input.setReprocessId(reprocessId);
 		
@@ -186,18 +188,20 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 	
 	@Override 
 	public List<Sentence> createSentences(SentenceRequest request) throws Exception{
-    	controller.setMetadata(sentenceProcessingDbMetaDataInputFactory.create(true));
+    	controller.setMetadata(getSentenceProcessingMetadata());
     	return controller.processSentences(request);
 	}
 	
 	@Override 
 	public SentenceProcessingMetaDataInput getSentenceProcessingMetadata(){
-		return sentenceProcessingDbMetaDataInputFactory.create(true);
+		if(metaDataInput==null) 
+			metaDataInput = sentenceProcessingDbMetaDataInputFactory.create(true);
+		return metaDataInput;
 	}
 
 	@Override 
 	public SentenceProcessingResult createSentences(SentenceTextRequest request) throws Exception {
-		controller.setMetadata(sentenceProcessingDbMetaDataInputFactory.create(true));
+		controller.setMetadata(getSentenceProcessingMetadata());
 		return controller.processText(request);
 	}
 

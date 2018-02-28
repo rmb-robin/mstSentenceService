@@ -57,8 +57,9 @@ public class RawReportController {
 				return Response.status(200).entity("Report already existed.").build();
 			
 			request.getDiscreteData().setRawFileId(fileId);
-			service.saveParsed(fileId,request);
-		
+			String parsedId = service.saveParsed(fileId,request);
+			request.getDiscreteData().setParseReportId(parsedId);
+			
 			if(!parsedResult.getMissingFields().isEmpty()) {
 				RejectedReport rejectedReport = new RejectedReport();
 				rejectedReport.setAccessionNumber(request.getDiscreteData().getAccessionNumber());
