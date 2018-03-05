@@ -195,7 +195,7 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 	@Override 
 	public SentenceProcessingMetaDataInput getSentenceProcessingMetadata(){
 		if(metaDataInput==null) 
-			metaDataInput = sentenceProcessingDbMetaDataInputFactory.create(true);
+			metaDataInput = sentenceProcessingDbMetaDataInputFactory.create();
 		return metaDataInput;
 	}
 
@@ -267,8 +267,5 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 		return result;
 	}
 
-	@Override
-	public List<SentenceDb> getSentenceById(String id) {
-		return sentenceQueryDao.getSentenceById(id) ;
-	}
+
 }

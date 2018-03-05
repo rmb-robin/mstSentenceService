@@ -12,4 +12,5 @@ public class SentenceServiceMongoDatastoreProvider extends MongoDatastoreProvide
 		connectionEntity.setIpAddress("10.210.192.4"); // dev.. 
 	//	connectionEntity.setIpAddress("10.12.128.98"); // prod.. 
 	}
+	
 }

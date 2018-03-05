@@ -32,5 +32,4 @@ public interface SentenceService {
 	SaveSentenceTextResponse processSentenceTextRequest(SentenceTextRequest request) throws Exception;
 	void saveEdges(Edges edges);
 	List<String> getSentenceTextForDiscreteDataId(String discreteDataId);
-	List<SentenceDb> getSentenceById(String id);
 }

@@ -17,7 +17,6 @@ import com.mst.model.sentenceProcessing.Sentence;
 import com.mst.model.sentenceProcessing.SentenceDb;
 import com.mst.model.sentenceProcessing.SentenceProcessingMetaDataInput;
 import com.mst.model.sentenceProcessing.TokenRelationship;
-import com.mst.model.tree.TreeNode;
 import com.mst.sentenceprocessing.interfaces.RecommandationService;
 import com.mst.sentenceprocessing.interfaces.QueryService;
 import com.mst.sentenceprocessing.interfaces.SentenceService;
@@ -103,20 +102,11 @@ public class SentenceController {
     @Path("/savetext")
     public Response saveText(SentenceTextRequest sentenceTextRequest){
     	try{
-    		if(!sentenceTextRequest.getIsProcessingtypeSentenceDiscovery()){
-    			sentenceService.processSentenceTextRequest(sentenceTextRequest);
-    			TextResponse response = new TextResponse();
-    			response.setMessage("sentences Saved");
-    			response.setResult("successful");
-    			return Response.status(200).entity(response).build();	
-    		}
-    		else{
-    			recommandationService.saveSentenceDiscoveryProcess(sentenceTextRequest);
-    			TextResponse response = new TextResponse();
-    			response.setMessage("sentences discoveries Saved");
-    			response.setResult("successful");
-    			return Response.status(200).entity(response).build();	
-    		}
+			sentenceService.processSentenceTextRequest(sentenceTextRequest);
+			TextResponse response = new TextResponse();
+			response.setMessage("sentences Saved");
+			response.setResult("successful");
+			return Response.status(200).entity(response).build();	
     	}
     	catch(Exception ex){
     		TextResponse response = new TextResponse();
@@ -169,43 +159,6 @@ public class SentenceController {
     		return Response.status(500).entity(ex.getMessage()).build();
     	}
     }
-    
-
-	@GET
-	@Path("/showtokenrelationships/{id}")
-	public Response showTokenRelationships(@PathParam("id") String id) throws Exception {
-		try {
-			List<SentenceDb> sentences = sentenceService.getSentenceById(id);
-			StringBuffer sb = new StringBuffer("<pre>");
-			for (SentenceDb sentence : sentences) {
-				sb.append("\nDumping result for sentence: \"" + sentence.getOrigSentence() + "\"");
-				
-				TreeNode<TokenRelationship> root = TokenRelationshipUtil
-						.buildTokenRelationshipTree(sentence.getTokenRelationships());
-				sb.append("\n\nStandard Token Relationship Edges");
-				for (TokenRelationship relationship : sentence.getTokenRelationships()) {
-					sb.append("\n" + relationship);
-				}
-				sb.append("\n\nRoot Tree:");
-				sb.append(TokenRelationshipUtil.treeToString(root));
-//				for (TreeNode<TokenRelationship> result : root) {
-//					sb.append("\n\nMatched Node for " + ");
-//					sb.append(TokenRelationshipUtil.treeToString(result));
-//				}
-			}
-			sb.append("</pre>");
-			return Response.status(200).entity(sb.toString()).build();
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			return Response.status(500).entity(ex.getMessage()).build();
-		}
-	}
-
-
-
-
-
-
 	@GET
 	@Path("processingdata")
 	public Response getProcessingData() {

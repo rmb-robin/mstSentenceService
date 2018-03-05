@@ -7,14 +7,11 @@ import java.util.Map;
 import java.util.Set;
 
 import com.mst.dao.DiscreteDataDaoImpl;
-import com.mst.dao.HL7ParsedRequstDaoImpl;
-import com.mst.dao.Hl7DetailsDaoImpl;
 import com.mst.dao.SentenceQueryDaoImpl;
 import com.mst.interfaces.DiscreteDataDao;
 import com.mst.interfaces.dao.SentenceQueryDao;
 import com.mst.interfaces.sentenceprocessing.DiscreteDataDuplicationIdentifier;
 import com.mst.model.discrete.DiscreteData;
-import com.mst.model.raw.HL7ParsedRequst;
 import com.mst.model.sentenceProcessing.Sentence;
 import com.mst.model.sentenceProcessing.SentenceDb;
 import com.mst.sentenceprocessing.DiscreteDataDuplicationIdentifierImpl;
@@ -22,7 +19,6 @@ import com.mst.sentenceprocessing.SentenceConverter;
 import com.mst.sentenceprocessing.interfaces.DiscreteDataService;
 import com.mst.sentenceprocessing.models.DiscreteDataRequest;
 import com.mst.sentenceprocessing.models.DiscreteDataResult;
-import com.mst.services.mst_sentence_service.RequestsMongoDatastoreProvider;
 import com.mst.services.mst_sentence_service.SentenceServiceMongoDatastoreProvider;
 
 public class DiscreteDataServiceImpl implements DiscreteDataService {
@@ -30,8 +26,6 @@ public class DiscreteDataServiceImpl implements DiscreteDataService {
 	private DiscreteDataDao dao;
 	private SentenceQueryDao sentenceQueryDao;
 	private DiscreteDataDuplicationIdentifier discreteDataDuplicationIdentifier;
-	private HL7ParsedRequstDaoImpl hl7RawDao; 
-	
 	
 	public DiscreteDataServiceImpl(){
 		SentenceServiceMongoDatastoreProvider provider = new SentenceServiceMongoDatastoreProvider();
@@ -41,8 +35,6 @@ public class DiscreteDataServiceImpl implements DiscreteDataService {
 		sentenceQueryDao = new SentenceQueryDaoImpl();
 		sentenceQueryDao.setMongoDatastoreProvider(provider);
 		discreteDataDuplicationIdentifier = new DiscreteDataDuplicationIdentifierImpl();
-		hl7RawDao = new HL7ParsedRequstDaoImpl();
-		hl7RawDao.setMongoDatastoreProvider(new RequestsMongoDatastoreProvider());
 	}
 	
 	@Override
@@ -53,28 +45,39 @@ public class DiscreteDataServiceImpl implements DiscreteDataService {
 		for(DiscreteData discreteData: discreteDatas){
 			DiscreteDataResult result = new DiscreteDataResult();
 			result.setDiscreteData(discreteData);
-			if(request.isIncludeSentences())
-				updateWithText(result);
 			results.add(result);
 		}
+		
+		if(!request.isIncludeSentences()) return results;
+		updateWithSentences(results);
 		return results;
 	}
 	
-	private void updateWithText(DiscreteDataResult discreteDataResult){	
-		String parsedFileId = discreteDataResult.getDiscreteData().getParseReportId();
-		if(parsedFileId==null) return;
-		HL7ParsedRequst parsedRequest =  hl7RawDao.get(parsedFileId);
-		if(parsedRequest==null)return;
-		discreteDataResult.setText(parsedRequest.getText());	
+	private void updateWithSentences(List<DiscreteDataResult> discreteDataResults){
+		Set<String> discreteDataIds = new HashSet<>();
+		discreteDataResults.forEach(a-> discreteDataIds.add(a.getDiscreteData().getId().toString()));
+		
+		for(DiscreteDataResult result: discreteDataResults){
+			List<SentenceDb> sentencedbs = sentenceQueryDao.getSentencesForDiscreteDataId(result.getDiscreteData().getId().toString());
+			sentencedbs.forEach(a-> result.getSentences().add(a.getOrigSentence()));
+		}	
 	}
 
+	private List<String> getSentenceText(List<Sentence> sentences){
+		List<String> result = new ArrayList<>();
+		sentences.forEach(a-> result.add(a.getOrigSentence()));
+		return result;
+	}
+	
 	@Override
 	public DiscreteDataResult getById(String id) {
 		DiscreteData discreteData = dao.get(id);
 		DiscreteDataResult result = new DiscreteDataResult();
 		result.setDiscreteData(discreteData);
-		updateWithText(result);
+		List<SentenceDb> documents = sentenceQueryDao.getSentencesForDiscreteDataId(id);
 		
+		if(documents==null || documents.isEmpty()) return result;
+		documents.forEach(a-> result.getSentences().add(a.getOrigSentence()));
 		return result;
 	}
 	
