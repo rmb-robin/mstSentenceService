@@ -77,9 +77,11 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 	}
 	
 	private void processQueryDiscreteData(List<SentenceQueryResult> results){
+		HashMap<String,String> reportTextByIds = new HashMap<String, String>();
 		Map<String,DiscreteData> discreteDatasById = new HashMap<>();
 		for(SentenceQueryResult result: results){
 			String key = result.getDiscreteData().getId().toString();
+			processReportText(result, reportTextByIds);
 			if(discreteDatasById.containsKey(key)) continue;
 			discreteDatasById.put(key, result.getDiscreteData());
 		}
@@ -88,6 +90,27 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 		discreteDataDuplicationIdentifier.process(discretaDatas);
 	}
 	
+	private void processReportText(SentenceQueryResult result, HashMap<String, String> reportTextByIds) {
+
+		if ( result == null || result.getDiscreteData() == null || result.getDiscreteData().getId() == null ) 
+			return;
+		String id = result.getDiscreteData().getId().toString();
+		if ( reportTextByIds.containsKey(id)) {
+			result.setReportText(reportTextByIds.get(id));
+			return;
+		}
+		
+		List<String> sentences = this.getSentenceTextForDiscreteDataId(id);
+		if ( sentences == null ) 
+			return;
+		StringBuffer text = new StringBuffer();
+		for ( String sentence : sentences) {
+			text.append(" " + sentence);
+		}
+		reportTextByIds.put(id,  text.toString().trim());
+		result.setReportText(reportTextByIds.get(id));
+	}
+
 	@Override 
 	public List<SentenceQueryResult> querySentences(SentenceQueryInput input) throws Exception{
 		if(input.getOrganizationId()==null)
