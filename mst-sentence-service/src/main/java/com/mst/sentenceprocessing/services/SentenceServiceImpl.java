@@ -10,8 +10,10 @@ import java.util.UUID;
 
 import org.bson.types.ObjectId;
 import org.glassfish.hk2.api.PreDestroy;
+import org.mongodb.morphia.query.Query;
 
 import com.mst.dao.DiscreteDataDaoImpl;
+import com.mst.dao.HL7ParsedRequstDaoImpl;
 import com.mst.dao.SentenceDaoImpl;
 import com.mst.dao.SentenceQueryDaoImpl;
 import com.mst.filter.NotAndAllRequestFactoryImpl;
@@ -29,6 +31,7 @@ import com.mst.model.SentenceQuery.SentenceQueryTextInput;
 import com.mst.model.SentenceQuery.SentenceReprocessingInput;
 import com.mst.model.discrete.DiscreteData;
 import com.mst.model.metadataTypes.DiscreteDataBucketIdenticationType;
+import com.mst.model.raw.HL7ParsedRequst;
 import com.mst.model.requests.SentenceRequest;
 import com.mst.model.requests.SentenceTextRequest;
 import com.mst.model.sentenceProcessing.Sentence;
@@ -44,6 +47,7 @@ import com.mst.sentenceprocessing.dao.SentenceProcessingDbMetaDataInputFactory;
 import com.mst.sentenceprocessing.interfaces.SentenceService;
 import com.mst.sentenceprocessing.models.Edges;
 import com.mst.sentenceprocessing.models.SaveSentenceTextResponse;
+import com.mst.services.mst_sentence_service.RequestsMongoDatastoreProvider;
 import com.mst.services.mst_sentence_service.SentenceServiceMongoDatastoreProvider;
 
 public class SentenceServiceImpl implements SentenceService,PreDestroy {
@@ -57,6 +61,7 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 	private DiscreteDataDao discreteDataDao;
 	private DiscreteDataDuplicationIdentifier discreteDataDuplicationIdentifier;
 //	private SentenceQueryConverter queryConverter; 
+	private final HL7ParsedRequstDaoImpl hl7RawDao;
 	
 	private static SentenceProcessingMetaDataInput metaDataInput;
 	
@@ -74,6 +79,9 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 		discreteDataDao.setMongoDatastoreProvider(mongoProvider);
 		discreteDataDuplicationIdentifier = new DiscreteDataDuplicationIdentifierImpl();
 //		queryConverter = new SentenceQueryConverterImpl();
+		
+		hl7RawDao = new HL7ParsedRequstDaoImpl();
+		hl7RawDao.setMongoDatastoreProvider(new RequestsMongoDatastoreProvider());
 	}
 	
 	private void processQueryDiscreteData(List<SentenceQueryResult> results){
@@ -94,20 +102,15 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 
 		if ( result == null || result.getDiscreteData() == null || result.getDiscreteData().getId() == null ) 
 			return;
-		String id = result.getDiscreteData().getId().toString();
+
+		String id = result.getDiscreteData().getParseReportId();
 		if ( reportTextByIds.containsKey(id)) {
 			result.setReportText(reportTextByIds.get(id));
 			return;
 		}
 		
-		List<String> sentences = this.getSentenceTextForDiscreteDataId(id);
-		if ( sentences == null ) 
-			return;
-		StringBuffer text = new StringBuffer();
-		for ( String sentence : sentences) {
-			text.append(" " + sentence);
-		}
-		reportTextByIds.put(id,  text.toString().trim());
+		String text = this.getSentenceTextForDiscreteDataIdByString(id);
+		reportTextByIds.put(id,  text.trim());
 		result.setReportText(reportTextByIds.get(id));
 	}
 
@@ -277,6 +280,17 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 	@Override
 	public void saveEdges(Edges edges) {
 		this.mongoProvider.getDefaultDb().save(edges);
+	}
+
+
+	public String getSentenceTextForDiscreteDataIdByString(String parsedFileId) {
+
+		if(parsedFileId==null) return "";
+		HL7ParsedRequst parsedRequest =  hl7RawDao.get(parsedFileId);
+		if(parsedRequest==null)return "";
+		
+		return parsedRequest.getText();	
+		
 	}
 
 	@Override
