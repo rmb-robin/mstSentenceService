@@ -9,8 +9,8 @@ public class RequestsMongoDatastoreProvider extends MongoDatastoreProviderBase i
 	public RequestsMongoDatastoreProvider(){
 		connectionEntity = new MongoConnectionEntity();
 		connectionEntity.setDatabaseName("requests");
-		//connectionEntity.setIpAddress("10.210.192.3"); // dev.. 
-		connectionEntity.setIpAddress("10.12.128.114"); // prod.. 
+		connectionEntity.setIpAddress("10.210.192.3"); // dev.. 
+	//	connectionEntity.setIpAddress("10.12.128.114"); // prod.. 
 		//add here for prod...
 
 	}

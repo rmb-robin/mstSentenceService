@@ -74,7 +74,8 @@ public class QueryServiceImpl implements QueryService {
 
 	@Override
 	public List<SentenceQueryResult> queryTextSentences(SentenceQueryTextInput input) throws Exception {
-		return sentenceQueryDao.getSentencesByText(input);
+		return null;
+		//return sentenceQueryDao.getSentencesByText(input);
 	}
 	
 

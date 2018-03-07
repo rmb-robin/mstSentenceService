@@ -9,12 +9,16 @@ import com.mst.model.sentenceProcessing.Sentence;
 public class DiscreteDataResult {
 
 	private DiscreteData discreteData;
-	private List<String> sentences; 
+	private List<String> sentences;
 
+	public DiscreteDataResult(){
+		sentences = new ArrayList<>();
+	}
+	
 	public DiscreteData getDiscreteData() {
 		return discreteData;
 	}
-
+	
 	public void setDiscreteData(DiscreteData discreteData) {
 		this.discreteData = discreteData;
 	}
@@ -27,8 +31,5 @@ public class DiscreteDataResult {
 		this.sentences = sentences;
 	}
 
-		public DiscreteDataResult(){
-		sentences = new ArrayList<>();
-	}
 	
 }

@@ -8,8 +8,9 @@ public class SentenceServiceMongoDatastoreProvider extends MongoDatastoreProvide
 
 	public SentenceServiceMongoDatastoreProvider(){
 		connectionEntity = new MongoConnectionEntity();
-		connectionEntity.setDatabaseName("processing_merged");
+		connectionEntity.setDatabaseName("test_new");
 		connectionEntity.setIpAddress("10.210.192.4"); // dev.. 
 	//	connectionEntity.setIpAddress("10.12.128.98"); // prod.. 
 	}
+	
 }

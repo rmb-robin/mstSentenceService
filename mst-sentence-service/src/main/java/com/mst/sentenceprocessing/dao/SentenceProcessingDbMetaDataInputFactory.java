@@ -19,7 +19,7 @@ public class SentenceProcessingDbMetaDataInputFactory implements SentenceProcess
 		this.mongoProvider = mongoProvider;
 	}
 
-	@Override
+	
 	public SentenceProcessingMetaDataInput create(boolean isSentenceProcessing) {
 		Query<SentenceProcessingMetaDataInput> query = mongoProvider.getDefaultDb().createQuery(SentenceProcessingMetaDataInput.class);
 		query.field("isSentenceProcessing").equal(isSentenceProcessing);	
@@ -31,5 +31,14 @@ public class SentenceProcessingDbMetaDataInputFactory implements SentenceProcess
 	private List<DynamicEdgeCreationRule> getRules(){
 		Query<DynamicEdgeCreationRule> query = mongoProvider.getDefaultDb().createQuery(DynamicEdgeCreationRule.class);
 		return query.asList();		
+	}
+
+
+	@Override
+	public SentenceProcessingMetaDataInput create() {
+		Query<SentenceProcessingMetaDataInput> query = mongoProvider.getDefaultDb().createQuery(SentenceProcessingMetaDataInput.class);	
+		SentenceProcessingMetaDataInput meta =  query.get();
+		meta.setDynamicEdgeCreationRules(getRules());
+		return meta;
 	}
 }
