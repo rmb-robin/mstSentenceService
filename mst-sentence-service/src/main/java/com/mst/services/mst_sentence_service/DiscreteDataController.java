@@ -9,10 +9,12 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
 import com.mst.model.SentenceQuery.DiscreteDataFilter;
+import com.mst.model.SentenceQuery.SentenceQueryResultDisplayFields;
 import com.mst.model.discrete.DiscreteData;
 import com.mst.sentenceprocessing.interfaces.DiscreteDataService;
 import com.mst.sentenceprocessing.models.DiscreteDataRequest;
 import com.mst.sentenceprocessing.models.DiscreteDataResult;
+import com.mst.sentenceprocessing.models.TextResponse;
 import com.mst.sentenceprocessing.services.DiscreteDataServiceImpl;
 
 
@@ -37,6 +39,34 @@ public class DiscreteDataController {
     	}
     }
 	
+	
+	@POST
+    @Path("/saveSentenceQueryResultDisplayFields")
+    public Response save(SentenceQueryResultDisplayFields fields){
+    	try{
+	     discreteDataService.saveSentenceQueryResultDisplayFields(fields);
+    	return Response.status(200).entity("saved").build(); 
+    	}
+    	catch(Exception ex){
+    		return Response.status(500).entity(ex.getMessage()).build();
+    	}
+    }
+	
+	@GET
+	@Path("/getsentencequeryresultdisplayfieldsbyorg/{id}")
+	public Response getSentenceQueryResultDisplayFields(@PathParam("id") String orgId){
+		try{
+			SentenceQueryResultDisplayFields fields = discreteDataService.getSentenceQueryResultByOrgId(orgId);
+			return Response.status(200).entity(fields).build(); 
+    	}
+    	catch(Exception ex){
+    		TextResponse response = new TextResponse(); 
+    		response.setMessage(ex.getMessage());
+    		response.setResult("error");
+    		return Response.status(500).entity(response).build();
+    	}
+	}
+
 	@GET
 	@Path("/getbyid/{id}")
 	public Response getById(@PathParam("id") String id){
@@ -48,6 +78,8 @@ public class DiscreteDataController {
     		return Response.status(500).entity(ex.getMessage()).build();
     	}
     }
+	
+	
 	
     
 	

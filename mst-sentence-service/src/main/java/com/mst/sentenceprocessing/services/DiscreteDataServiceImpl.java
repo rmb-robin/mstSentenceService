@@ -8,9 +8,12 @@ import java.util.Set;
 
 import com.mst.dao.DiscreteDataDaoImpl;
 import com.mst.dao.SentenceQueryDaoImpl;
+import com.mst.dao.SentenceQueryResultDisplayFieldsDaoImpl;
 import com.mst.interfaces.DiscreteDataDao;
 import com.mst.interfaces.dao.SentenceQueryDao;
+import com.mst.interfaces.dao.SentenceQueryResultDisplayFieldsDao;
 import com.mst.interfaces.sentenceprocessing.DiscreteDataDuplicationIdentifier;
+import com.mst.model.SentenceQuery.SentenceQueryResultDisplayFields;
 import com.mst.model.discrete.DiscreteData;
 import com.mst.model.sentenceProcessing.Sentence;
 import com.mst.model.sentenceProcessing.SentenceDb;
@@ -26,7 +29,7 @@ public class DiscreteDataServiceImpl implements DiscreteDataService {
 	private DiscreteDataDao dao;
 	private SentenceQueryDao sentenceQueryDao;
 	private DiscreteDataDuplicationIdentifier discreteDataDuplicationIdentifier;
-	
+	private SentenceQueryResultDisplayFieldsDao sentenceQueryResultDisplayFieldsdao; 
 	public DiscreteDataServiceImpl(){
 		SentenceServiceMongoDatastoreProvider provider = new SentenceServiceMongoDatastoreProvider();
 		dao = new DiscreteDataDaoImpl();
@@ -34,6 +37,8 @@ public class DiscreteDataServiceImpl implements DiscreteDataService {
 		
 		sentenceQueryDao = new SentenceQueryDaoImpl();
 		sentenceQueryDao.setMongoDatastoreProvider(provider);
+		sentenceQueryResultDisplayFieldsdao = new SentenceQueryResultDisplayFieldsDaoImpl();
+		sentenceQueryResultDisplayFieldsdao.setMongoDatastoreProvider(provider);
 		discreteDataDuplicationIdentifier = new DiscreteDataDuplicationIdentifierImpl();
 	}
 	
@@ -80,8 +85,15 @@ public class DiscreteDataServiceImpl implements DiscreteDataService {
 		documents.forEach(a-> result.getSentences().add(a.getOrigSentence()));
 		return result;
 	}
-	
-	
-	
+
+	@Override
+	public void saveSentenceQueryResultDisplayFields(SentenceQueryResultDisplayFields fields) {
+		sentenceQueryResultDisplayFieldsdao.save(fields);
+	}
+
+	@Override
+	public SentenceQueryResultDisplayFields getSentenceQueryResultByOrgId(String orgId) {
+		return sentenceQueryResultDisplayFieldsdao.getByOrgId(orgId);
+	}
 }
  
