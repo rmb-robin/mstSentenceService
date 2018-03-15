@@ -76,8 +76,6 @@ public class RecommandationServiceImpl implements RecommandationService {
 	}
 
 	private void saveRecommandedTokenRelationships(List<SentenceDiscovery> sentenceDiscoveries,List<RecommendedTokenRelationship> existing, SentenceProcessingMetaDataInput input) {
-
-		
 		List<RecommendedTokenRelationship> allEdges = getAllRecommendTokenRelationships(sentenceDiscoveries,existing);
 		nounPhraseProcesser.setNamedEdges(allEdges, input.getNounRelationshipsInput());
 		recommendedTokenRelationshipDao.saveCollection(allEdges);
