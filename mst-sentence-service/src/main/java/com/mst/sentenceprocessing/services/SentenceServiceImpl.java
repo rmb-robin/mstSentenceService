@@ -11,16 +11,14 @@ import java.util.stream.Collectors;
 
 import org.bson.types.ObjectId;
 import org.glassfish.hk2.api.PreDestroy;
-import org.mongodb.morphia.query.Query;
-
 import com.mst.dao.DiscreteDataDaoImpl;
 import com.mst.dao.HL7ParsedRequstDaoImpl;
 import com.mst.dao.SentenceDaoImpl;
 import com.mst.dao.SentenceQueryDaoImpl;
+import com.mst.filter.CystAndAAAReportFilterImpl;
 import com.mst.filter.ITNReportFilterImpl;
 import com.mst.filter.ImpressionReportFilterImpl;
 import com.mst.filter.NotAndAllRequestFactoryImpl;
-import com.mst.filter.ReportFilterByQueryImpl;
 import com.mst.filter.ReportFilterException;
 import com.mst.filter.ReportQueryFilter;
 import com.mst.interfaces.DiscreteDataDao;
@@ -30,7 +28,6 @@ import com.mst.interfaces.sentenceprocessing.DiscreteDataInputProcesser;
 import com.mst.interfaces.sentenceprocessing.SentenceProcessingController;
 import com.mst.interfaces.SentenceProcessingMetaDataInputFactory;
 import com.mst.interfaces.dao.SentenceDao;
-import com.mst.interfaces.dao.SentenceQueryDao;
 import com.mst.model.SentenceQuery.SentenceQueryInput;
 import com.mst.model.SentenceQuery.SentenceQueryResult;
 import com.mst.model.SentenceQuery.SentenceQueryTextInput;
@@ -175,7 +172,7 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 			List<ReportQueryFilter> filters = new ArrayList<ReportQueryFilter>();
 			filters.add(new ITNReportFilterImpl(input, sentenceCache));
 			filters.add(new ImpressionReportFilterImpl(input, sentenceCache));
-			filters.add(new ReportFilterByQueryImpl(input, sentenceCache));
+			filters.add(new CystAndAAAReportFilterImpl(input, sentenceCache));
 
 			for (ReportQueryFilter filter : filters) {
 				filter.setDebug(input.isDebug());
