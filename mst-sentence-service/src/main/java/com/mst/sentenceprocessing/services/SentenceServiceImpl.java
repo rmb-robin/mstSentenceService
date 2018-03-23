@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.bson.types.ObjectId;
 import org.glassfish.hk2.api.PreDestroy;
@@ -16,7 +17,12 @@ import com.mst.dao.DiscreteDataDaoImpl;
 import com.mst.dao.HL7ParsedRequstDaoImpl;
 import com.mst.dao.SentenceDaoImpl;
 import com.mst.dao.SentenceQueryDaoImpl;
+import com.mst.filter.ITNReportFilterImpl;
+import com.mst.filter.ImpressionReportFilterImpl;
 import com.mst.filter.NotAndAllRequestFactoryImpl;
+import com.mst.filter.ReportFilterByQueryImpl;
+import com.mst.filter.ReportFilterException;
+import com.mst.filter.ReportQueryFilter;
 import com.mst.interfaces.DiscreteDataDao;
 import com.mst.interfaces.MongoDatastoreProvider;
 import com.mst.interfaces.sentenceprocessing.DiscreteDataDuplicationIdentifier;
@@ -52,7 +58,7 @@ import com.mst.services.mst_sentence_service.SentenceServiceMongoDatastoreProvid
 
 public class SentenceServiceImpl implements SentenceService,PreDestroy {
 
-	private SentenceQueryDao sentenceQueryDao; 
+	private SentenceQueryDaoImpl sentenceQueryDao; 
 	private SentenceDao sentenceDao;
 	private MongoDatastoreProvider  mongoProvider; 
 	private SentenceProcessingMetaDataInputFactory sentenceProcessingDbMetaDataInputFactory;
@@ -62,7 +68,7 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 	private DiscreteDataDuplicationIdentifier discreteDataDuplicationIdentifier;
 //	private SentenceQueryConverter queryConverter; 
 	private final HL7ParsedRequstDaoImpl hl7RawDao;
-	
+
 	private static SentenceProcessingMetaDataInput metaDataInput;
 	
 	public SentenceServiceImpl(){
@@ -128,10 +134,79 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 //			input = queryConverter.convertST(input, stInstance,sentenceProcessingDbMetaDataInputFactory.create());
 //		
 		List<SentenceQueryResult> results =  sentenceQueryDao.getSentences(input);
+		Map<String, SentenceDb> sentences = new HashMap<String, SentenceDb>();
+
+		
 		processQueryDiscreteData(results);
+		if ( input.isFilterByReport()) {
+			//  TODO hacked this to get the cumulative list only for the filter. 
+			sentences.putAll(sentenceQueryDao.sentenceFilterController.cumalativeSentenceResults);
+			processReportFilters(results, input, sentences);
+		}
 		return results;
 	}
-	
+	private List<SentenceQueryResult> getMatchesByDiscreateId(List<SentenceQueryResult> results, String id) {
+		return results.parallelStream().filter((result) -> result.getDiscreteData().getId().toString().equals(id))
+				.collect(Collectors.toList());
+	}
+
+	private void processReportFilters(List<SentenceQueryResult> results, SentenceQueryInput input,
+			Map<String, SentenceDb> sentenceCache) {
+
+		List<String> ids = results.stream().map((result) -> result.getDiscreteData().getId().toString()).distinct()
+				.collect(Collectors.toList());
+
+		for (String id : ids) {
+
+			List<SentenceQueryResult> idResults = getMatchesByDiscreateId(results, id);
+			if (idResults.size() <= 1) {
+				if (input.isDebug())
+					System.out.println("Nothing to filter on discreteId: " + id);
+				continue;
+			}
+
+			List<SentenceDb> sentences = idResults.parallelStream()
+					.map(idResult -> sentenceCache.get(idResult.getSentenceId())).filter(s -> s != null).distinct()
+					.collect(Collectors.toList());
+
+			if (input.isDebug())
+				System.out.println("Filter by discreteId:" + id);
+
+			List<ReportQueryFilter> filters = new ArrayList<ReportQueryFilter>();
+			filters.add(new ITNReportFilterImpl(input, sentenceCache));
+			filters.add(new ImpressionReportFilterImpl(input, sentenceCache));
+			filters.add(new ReportFilterByQueryImpl(input, sentenceCache));
+
+			for (ReportQueryFilter filter : filters) {
+				filter.setDebug(input.isDebug());
+				filter.build(this.sentenceQueryDao, results, sentences, input);
+				if (filter.qualifingFilter()) {
+					int rowsFiltered;
+					try {
+						if (input.isDebug())
+							System.out.println("  Applying filter: " + filter.getClass().getName());
+						filter.setDebug(input.isDebug());
+						rowsFiltered = filter.process(results);
+						if (input.isDebug())
+							System.out
+									.println("Filtered out : " + rowsFiltered + " new result size: " + results.size());
+					} catch (ReportFilterException e) {
+						e.printStackTrace();
+					}
+					break;
+				} else {
+					if (input.isDebug())
+						System.out.println("  Filter does not qualify: " + filter.getClass().getName());
+				}
+			}
+
+
+		}
+
+	}
+		
+
+
 	@Override 
 	public List<SentenceQueryResult> queryTextSentences(SentenceQueryTextInput input) throws Exception {
 		return null;

@@ -122,11 +122,13 @@ public class SentenceController {
     	try{
 	    	List<SentenceQueryResult> queryResults = sentenceService.querySentences(input);
 	    	SentenceQueryOutput result = new SentenceQueryOutput();
+
 	    	result.setSentenceQueryResults(queryResults);
 	    	result.setSize(queryResults.size());
 	    	return Response.status(200).entity(result).build(); 
     	}
     	catch(Exception ex){
+    		ex.printStackTrace();
     		return Response.status(500).entity(ex.getMessage()).build();
     	}
     }
