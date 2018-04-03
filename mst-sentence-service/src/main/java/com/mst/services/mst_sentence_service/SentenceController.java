@@ -120,7 +120,9 @@ public class SentenceController {
     @Path("/query")
     public Response querySentences(SentenceQueryInput input){
     	try{
-	    	List<SentenceQueryResult> queryResults = sentenceService.querySentences(input);
+	    	input.setFilterByReport(true);
+	    	input.setFilterByTokenSequence(true);
+    		List<SentenceQueryResult> queryResults = sentenceService.querySentences(input);
 	    	SentenceQueryOutput result = new SentenceQueryOutput();
 	    	result.setSentenceQueryResults(queryResults);
 	    	result.setSize(queryResults.size());

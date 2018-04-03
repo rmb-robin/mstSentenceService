@@ -14,23 +14,28 @@ import org.mongodb.morphia.query.Query;
 
 import com.mst.dao.DiscreteDataDaoImpl;
 import com.mst.dao.HL7ParsedRequstDaoImpl;
+import com.mst.dao.QueryBusinessRuleDaoImpl;
 import com.mst.dao.SentenceDaoImpl;
 import com.mst.dao.SentenceQueryDaoImpl;
 import com.mst.filter.NotAndAllRequestFactoryImpl;
+import com.mst.filter.TokenSequenceQueryBusinessRuleFilterImpl;
 import com.mst.interfaces.DiscreteDataDao;
 import com.mst.interfaces.MongoDatastoreProvider;
 import com.mst.interfaces.sentenceprocessing.DiscreteDataDuplicationIdentifier;
 import com.mst.interfaces.sentenceprocessing.DiscreteDataInputProcesser;
 import com.mst.interfaces.sentenceprocessing.SentenceProcessingController;
 import com.mst.interfaces.SentenceProcessingMetaDataInputFactory;
+import com.mst.interfaces.dao.QueryBusinessRuleDao;
 import com.mst.interfaces.dao.SentenceDao;
 import com.mst.interfaces.dao.SentenceQueryDao;
 import com.mst.model.SentenceQuery.SentenceQueryInput;
 import com.mst.model.SentenceQuery.SentenceQueryResult;
 import com.mst.model.SentenceQuery.SentenceQueryTextInput;
 import com.mst.model.SentenceQuery.SentenceReprocessingInput;
+import com.mst.model.businessRule.QueryBusinessRule;
 import com.mst.model.discrete.DiscreteData;
 import com.mst.model.metadataTypes.DiscreteDataBucketIdenticationType;
+import com.mst.model.metadataTypes.QueryBusinessRuleTypes;
 import com.mst.model.raw.HL7ParsedRequst;
 import com.mst.model.requests.SentenceRequest;
 import com.mst.model.requests.SentenceTextRequest;
@@ -62,6 +67,9 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 	private DiscreteDataDuplicationIdentifier discreteDataDuplicationIdentifier;
 //	private SentenceQueryConverter queryConverter; 
 	private final HL7ParsedRequstDaoImpl hl7RawDao;
+	private QueryBusinessRuleDao queryBusinessRuleDao;
+			
+	
 	
 	private static SentenceProcessingMetaDataInput metaDataInput;
 	
@@ -82,6 +90,8 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 		
 		hl7RawDao = new HL7ParsedRequstDaoImpl();
 		hl7RawDao.setMongoDatastoreProvider(new RequestsMongoDatastoreProvider());
+		queryBusinessRuleDao = new QueryBusinessRuleDaoImpl();
+		queryBusinessRuleDao.setMongoDatastoreProvider(mongoProvider);
 	}
 	
 	private void processQueryDiscreteData(List<SentenceQueryResult> results){
@@ -127,7 +137,15 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 //		if(stInstance!=null)
 //			input = queryConverter.convertST(input, stInstance,sentenceProcessingDbMetaDataInputFactory.create());
 //		
+		//if(inpu)
+		
 		List<SentenceQueryResult> results =  sentenceQueryDao.getSentences(input);
+		if(input.isFilterByTokenSequence()){
+			QueryBusinessRule rule = queryBusinessRuleDao.get(input.getOrganizationId(),QueryBusinessRuleTypes.tokensequenceexlcude);
+			TokenSequenceQueryBusinessRuleFilterImpl queryBusinessRuleFilterImpl = new TokenSequenceQueryBusinessRuleFilterImpl();
+			results = queryBusinessRuleFilterImpl.filterByBusinessRule(results, rule);
+			
+		}
 		processQueryDiscreteData(results);
 		return results;
 	}
