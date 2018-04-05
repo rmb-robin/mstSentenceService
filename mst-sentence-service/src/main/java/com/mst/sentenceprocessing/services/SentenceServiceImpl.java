@@ -140,12 +140,7 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 		//if(inpu)
 		
 		List<SentenceQueryResult> results =  sentenceQueryDao.getSentences(input);
-		if(input.isFilterByTokenSequence()){
-			QueryBusinessRule rule = queryBusinessRuleDao.get(input.getOrganizationId(),QueryBusinessRuleTypes.tokensequenceexlcude);
-			TokenSequenceQueryBusinessRuleFilterImpl queryBusinessRuleFilterImpl = new TokenSequenceQueryBusinessRuleFilterImpl();
-			results = queryBusinessRuleFilterImpl.filterByBusinessRule(results, rule);
-			
-		}
+	
 		processQueryDiscreteData(results);
 		return results;
 	}
