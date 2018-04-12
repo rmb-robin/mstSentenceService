@@ -9,12 +9,13 @@ public class SentenceServiceMongoDatastoreProvider extends MongoDatastoreProvide
 	public SentenceServiceMongoDatastoreProvider(){
 		connectionEntity = new MongoConnectionEntity();
 		connectionEntity.setDatabaseName("test");
-	//	connectionEntity.setIpAddress("10.0.129.218"); //qa - radius..
-		connectionEntity.setIpAddress("10.0.129.219"); // prod -- radius.. 
+		connectionEntity.setIpAddress("10.0.129.218"); //qa - radius..
+	//	connectionEntity.setIpAddress("10.0.129.219"); // prod -- radius..
 		
 	//	connectionEntity.setIpAddress("10.210.192.4"); // dev.. 
-	//	connectionEntity.setIpAddress("10.12.128.98"); // prod.. 
-	
+	//	connectionEntity.setIpAddress("10.12.128.98"); // prod..
+
+
 	
 	}
 	
