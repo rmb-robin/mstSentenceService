@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import com.mst.filter.CreateSynonymQueryBusinessRuleFilterImpl;
+import com.mst.model.metadataTypes.CreateSynonymQueryBusinessRuleType;
 import org.bson.types.ObjectId;
 import org.glassfish.hk2.api.PreDestroy;
 import org.mongodb.morphia.query.Query;
@@ -54,6 +56,7 @@ import com.mst.sentenceprocessing.models.Edges;
 import com.mst.sentenceprocessing.models.SaveSentenceTextResponse;
 import com.mst.services.mst_sentence_service.RequestsMongoDatastoreProvider;
 import com.mst.services.mst_sentence_service.SentenceServiceMongoDatastoreProvider;
+
 
 public class SentenceServiceImpl implements SentenceService,PreDestroy {
 
@@ -138,9 +141,19 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 //			input = queryConverter.convertST(input, stInstance,sentenceProcessingDbMetaDataInputFactory.create());
 //		
 		//if(inpu)
+
+
+		CreateSynonymQueryBusinessRuleFilterImpl createSynonymQueryBusinessRuleFilter = new CreateSynonymQueryBusinessRuleFilterImpl();
+		QueryBusinessRule rule = queryBusinessRuleDao.get(input.getOrganizationId(), QueryBusinessRuleTypes.CREATE_SYNONYM);
+		CreateSynonymQueryBusinessRuleType result = createSynonymQueryBusinessRuleFilter.filterByBusinessRule(input, rule);
+
+		if (result != null) {
+			List<SentenceQueryResult> results = sentenceQueryDao.getSentences(result.getInput());
+			processQueryDiscreteData(results);
+			return createSynonymQueryBusinessRuleFilter.modifyByBusinessRule(results, result.getRulesApplied());
+		}
 		
 		List<SentenceQueryResult> results =  sentenceQueryDao.getSentences(input);
-	
 		processQueryDiscreteData(results);
 		return results;
 	}
