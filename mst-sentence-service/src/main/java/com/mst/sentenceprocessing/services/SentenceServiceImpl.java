@@ -8,36 +8,31 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import com.mst.filter.CreateSynonymQueryBusinessRuleFilterImpl;
-import com.mst.model.metadataTypes.CreateSynonymQueryBusinessRuleType;
+import com.mst.dao.*;
+import com.mst.filter.AddEdgeBusinessRuleFilterImpl;
+import com.mst.interfaces.dao.BusinessRuleDao;
+import com.mst.interfaces.filter.BusinessRuleFilter;
+import com.mst.model.businessRule.AddEdgeToQueryResults;
+import com.mst.model.businessRule.BusinessRule;
 import org.bson.types.ObjectId;
 import org.glassfish.hk2.api.PreDestroy;
 import org.mongodb.morphia.query.Query;
 
-import com.mst.dao.DiscreteDataDaoImpl;
-import com.mst.dao.HL7ParsedRequstDaoImpl;
-import com.mst.dao.QueryBusinessRuleDaoImpl;
-import com.mst.dao.SentenceDaoImpl;
-import com.mst.dao.SentenceQueryDaoImpl;
 import com.mst.filter.NotAndAllRequestFactoryImpl;
-import com.mst.filter.TokenSequenceQueryBusinessRuleFilterImpl;
 import com.mst.interfaces.DiscreteDataDao;
 import com.mst.interfaces.MongoDatastoreProvider;
 import com.mst.interfaces.sentenceprocessing.DiscreteDataDuplicationIdentifier;
 import com.mst.interfaces.sentenceprocessing.DiscreteDataInputProcesser;
 import com.mst.interfaces.sentenceprocessing.SentenceProcessingController;
 import com.mst.interfaces.SentenceProcessingMetaDataInputFactory;
-import com.mst.interfaces.dao.QueryBusinessRuleDao;
 import com.mst.interfaces.dao.SentenceDao;
 import com.mst.interfaces.dao.SentenceQueryDao;
 import com.mst.model.SentenceQuery.SentenceQueryInput;
 import com.mst.model.SentenceQuery.SentenceQueryResult;
 import com.mst.model.SentenceQuery.SentenceQueryTextInput;
 import com.mst.model.SentenceQuery.SentenceReprocessingInput;
-import com.mst.model.businessRule.QueryBusinessRule;
 import com.mst.model.discrete.DiscreteData;
 import com.mst.model.metadataTypes.DiscreteDataBucketIdenticationType;
-import com.mst.model.metadataTypes.QueryBusinessRuleTypes;
 import com.mst.model.raw.HL7ParsedRequst;
 import com.mst.model.requests.SentenceRequest;
 import com.mst.model.requests.SentenceTextRequest;
@@ -59,7 +54,6 @@ import com.mst.services.mst_sentence_service.SentenceServiceMongoDatastoreProvid
 
 
 public class SentenceServiceImpl implements SentenceService,PreDestroy {
-
 	private SentenceQueryDao sentenceQueryDao; 
 	private SentenceDao sentenceDao;
 	private MongoDatastoreProvider  mongoProvider; 
@@ -70,10 +64,8 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 	private DiscreteDataDuplicationIdentifier discreteDataDuplicationIdentifier;
 //	private SentenceQueryConverter queryConverter; 
 	private final HL7ParsedRequstDaoImpl hl7RawDao;
-	private QueryBusinessRuleDao queryBusinessRuleDao;
-			
-	
-	
+	private BusinessRuleDao businessRuleDao;
+
 	private static SentenceProcessingMetaDataInput metaDataInput;
 	
 	public SentenceServiceImpl(){
@@ -93,8 +85,8 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 		
 		hl7RawDao = new HL7ParsedRequstDaoImpl();
 		hl7RawDao.setMongoDatastoreProvider(new RequestsMongoDatastoreProvider());
-		queryBusinessRuleDao = new QueryBusinessRuleDaoImpl();
-		queryBusinessRuleDao.setMongoDatastoreProvider(mongoProvider);
+		businessRuleDao = new BusinessRuleDaoImpl(BusinessRule.class);
+		businessRuleDao.setMongoDatastoreProvider(mongoProvider);
 	}
 	
 	private void processQueryDiscreteData(List<SentenceQueryResult> results){
@@ -143,16 +135,14 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 		//if(inpu)
 
 
-		CreateSynonymQueryBusinessRuleFilterImpl createSynonymQueryBusinessRuleFilter = new CreateSynonymQueryBusinessRuleFilterImpl();
-		QueryBusinessRule rule = queryBusinessRuleDao.get(input.getOrganizationId(), QueryBusinessRuleTypes.CREATE_SYNONYM);
-		CreateSynonymQueryBusinessRuleType result = createSynonymQueryBusinessRuleFilter.filterByBusinessRule(input, rule);
-
-		if (result != null) {
-			List<SentenceQueryResult> results = sentenceQueryDao.getSentences(result.getInput());
+		BusinessRule businessRule = businessRuleDao.get(input.getOrganizationId(), AddEdgeToQueryResults.class.getSimpleName());
+		if (businessRule != null) {
+			BusinessRuleFilter businessRuleFilter = new AddEdgeBusinessRuleFilterImpl();
+			List<SentenceQueryResult> results = sentenceQueryDao.getSentences(input);
 			processQueryDiscreteData(results);
-			return createSynonymQueryBusinessRuleFilter.modifyByBusinessRule(results, result.getRulesApplied());
+			return businessRuleFilter.modifySentenceQueryResults(results, businessRule);
 		}
-		
+
 		List<SentenceQueryResult> results =  sentenceQueryDao.getSentences(input);
 		processQueryDiscreteData(results);
 		return results;
