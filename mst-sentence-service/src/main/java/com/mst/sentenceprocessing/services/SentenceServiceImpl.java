@@ -12,11 +12,11 @@ import com.mst.dao.*;
 import com.mst.filter.AddEdgeBusinessRuleFilterImpl;
 import com.mst.interfaces.dao.BusinessRuleDao;
 import com.mst.interfaces.filter.BusinessRuleFilter;
+import com.mst.model.SentenceQuery.*;
 import com.mst.model.businessRule.AddEdgeToQueryResults;
 import com.mst.model.businessRule.BusinessRule;
 import org.bson.types.ObjectId;
 import org.glassfish.hk2.api.PreDestroy;
-import org.mongodb.morphia.query.Query;
 
 import com.mst.filter.NotAndAllRequestFactoryImpl;
 import com.mst.interfaces.DiscreteDataDao;
@@ -27,10 +27,6 @@ import com.mst.interfaces.sentenceprocessing.SentenceProcessingController;
 import com.mst.interfaces.SentenceProcessingMetaDataInputFactory;
 import com.mst.interfaces.dao.SentenceDao;
 import com.mst.interfaces.dao.SentenceQueryDao;
-import com.mst.model.SentenceQuery.SentenceQueryInput;
-import com.mst.model.SentenceQuery.SentenceQueryResult;
-import com.mst.model.SentenceQuery.SentenceQueryTextInput;
-import com.mst.model.SentenceQuery.SentenceReprocessingInput;
 import com.mst.model.discrete.DiscreteData;
 import com.mst.model.metadataTypes.DiscreteDataBucketIdenticationType;
 import com.mst.model.raw.HL7ParsedRequst;
@@ -90,7 +86,7 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 	}
 	
 	private void processQueryDiscreteData(List<SentenceQueryResult> results){
-		HashMap<String,String> reportTextByIds = new HashMap<String, String>();
+		HashMap<String,String> reportTextByIds = new HashMap<>();
 		Map<String,DiscreteData> discreteDatasById = new HashMap<>();
 		for(SentenceQueryResult result: results){
 			String key = result.getDiscreteData().getId().toString();
@@ -99,7 +95,7 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 			discreteDatasById.put(key, result.getDiscreteData());
 		}
 		
-		List<DiscreteData> discretaDatas = new ArrayList<DiscreteData>(discreteDatasById.values());
+		List<DiscreteData> discretaDatas = new ArrayList<>(discreteDatasById.values());
 		discreteDataDuplicationIdentifier.process(discretaDatas);
 	}
 	
@@ -126,14 +122,6 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 	
 		if(input.getIsNotAndAll())
 			input = new NotAndAllRequestFactoryImpl().create(input);
-	
-//		SentenceQueryInstance stInstance = queryConverter.getSTQueryInstance(input);
-	
-//		if(stInstance!=null)
-//			input = queryConverter.convertST(input, stInstance,sentenceProcessingDbMetaDataInputFactory.create());
-//		
-		//if(inpu)
-
 
 		BusinessRule businessRule = businessRuleDao.get(input.getOrganizationId(), AddEdgeToQueryResults.class.getSimpleName());
 		if (businessRule != null) {
@@ -149,13 +137,13 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 	}
 	
 	@Override 
-	public List<SentenceQueryResult> queryTextSentences(SentenceQueryTextInput input) throws Exception {
+	public List<SentenceQueryResult> queryTextSentences(SentenceQueryTextInput input) {
 		return null;
 	}
 
 	@Override 
 	public void saveSentences(List<Sentence> sentences, DiscreteData discreteData, SentenceProcessingFailures sentenceProcessingFailures,boolean isReprocess, String reprocessId, String resultType){
-		List<SentenceDb> documents = new ArrayList<SentenceDb>();
+		List<SentenceDb> documents = new ArrayList<>();
 		for(Sentence sentence: sentences){
 			SentenceDb document = SentenceConverter.convertToDocument(sentence);
 			if(isReprocess){
@@ -176,8 +164,6 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 	}
 	
 	//move to other project...
-
-	
 	@Override 
 	public String reprocessSentences(SentenceReprocessingInput input) {
 		controller.setMetadata(getSentenceProcessingMetadata());
@@ -247,7 +233,6 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 		return controller.processText(request);
 	}
 
-	
 	@Override 
 	public List<String> getEdgeNamesForTokens(List<String> tokens) {
 		Edges edges =  this.mongoProvider.getDefaultDb().createQuery(Edges.class).get();
@@ -260,11 +245,9 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 		return sentenceQueryDao.getSentencesForReprocess(input);
 	}
 
-	
-
 	@Override
 	public void reprocessDiscreteData(String id) {
-		Set<String> discreteDataIds = new HashSet<String>();
+		Set<String> discreteDataIds = new HashSet<>();
 		discreteDataIds.add(id);
 		List<SentenceDb> sentencesForDiscreteData = sentenceQueryDao.getSentencesByDiscreteDataIds(discreteDataIds);
 		List<Sentence> sentences = SentenceConverter.convertToSentence(sentencesForDiscreteData,true,true,false);
@@ -298,15 +281,13 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 		this.mongoProvider.getDefaultDb().save(edges);
 	}
 
-
-	public String getSentenceTextForDiscreteDataIdByString(String parsedFileId) {
+	private String getSentenceTextForDiscreteDataIdByString(String parsedFileId) {
 
 		if(parsedFileId==null) return "";
 		HL7ParsedRequst parsedRequest =  hl7RawDao.get(parsedFileId);
 		if(parsedRequest==null)return "";
 		
-		return parsedRequest.getText();	
-		
+		return parsedRequest.getText();
 	}
 
 	@Override
@@ -320,5 +301,11 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 		return result;
 	}
 
-
+	@Override
+	public void RemoveNonDisplayEdges(List<SentenceQueryResult> queryResults) {
+		for(SentenceQueryResult queryResult : queryResults) {
+			List<SentenceQueryEdgeResult> edgeResults = queryResult.getSentenceQueryEdgeResults();
+			edgeResults.removeIf(r -> !r.isDisplayEdge());
+		}
+	}
 }
