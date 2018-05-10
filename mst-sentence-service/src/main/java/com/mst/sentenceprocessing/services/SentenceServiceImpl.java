@@ -9,11 +9,12 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.mst.dao.*;
-import com.mst.filter.AddEdgeBusinessRuleFilterImpl;
+import com.mst.filter.BusinessRuleFilterImpl;
 import com.mst.interfaces.dao.BusinessRuleDao;
 import com.mst.interfaces.filter.BusinessRuleFilter;
 import com.mst.model.SentenceQuery.*;
 import com.mst.model.businessRule.AddEdgeToQueryResults;
+import com.mst.model.businessRule.AppendToQueryInput;
 import com.mst.model.businessRule.BusinessRule;
 import org.bson.types.ObjectId;
 import org.glassfish.hk2.api.PreDestroy;
@@ -123,13 +124,17 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 		if(input.getIsNotAndAll())
 			input = new NotAndAllRequestFactoryImpl().create(input);
 
-		BusinessRule businessRule = businessRuleDao.get(input.getOrganizationId(), AddEdgeToQueryResults.class.getSimpleName());
-		if (businessRule != null) {
-			BusinessRuleFilter businessRuleFilter = new AddEdgeBusinessRuleFilterImpl();
-			List<SentenceQueryResult> results = sentenceQueryDao.getSentences(input);
-			processQueryDiscreteData(results);
-			return businessRuleFilter.modifySentenceQueryResults(results, businessRule);
-		}
+        BusinessRule appendToQueryInput = businessRuleDao.get(input.getOrganizationId(), AppendToQueryInput.class.getSimpleName());
+        BusinessRule addEdgeToQueryResults = businessRuleDao.get(input.getOrganizationId(), AddEdgeToQueryResults.class.getSimpleName());
+
+        if (appendToQueryInput != null || addEdgeToQueryResults != null) {
+            BusinessRuleFilter businessRuleFilter = new BusinessRuleFilterImpl();
+            input = (appendToQueryInput != null) ? businessRuleFilter.modifySentenceQueryInput(input, appendToQueryInput) : input;
+            List<SentenceQueryResult> results = sentenceQueryDao.getSentences(input);
+            processQueryDiscreteData(results);
+            results = (addEdgeToQueryResults != null) ? businessRuleFilter.modifySentenceQueryResults(results, addEdgeToQueryResults) : results;
+            return results;
+        }
 
 		List<SentenceQueryResult> results =  sentenceQueryDao.getSentences(input);
 		processQueryDiscreteData(results);
