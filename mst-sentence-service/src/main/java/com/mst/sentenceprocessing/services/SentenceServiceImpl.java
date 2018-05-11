@@ -16,6 +16,7 @@ import com.mst.model.SentenceQuery.*;
 import com.mst.model.businessRule.AddEdgeToQueryResults;
 import com.mst.model.businessRule.AppendToQueryInput;
 import com.mst.model.businessRule.BusinessRule;
+import com.mst.model.businessRule.RemoveEdgeFromQueryResults;
 import org.bson.types.ObjectId;
 import org.glassfish.hk2.api.PreDestroy;
 
@@ -126,6 +127,7 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 
         BusinessRule appendToQueryInput = businessRuleDao.get(input.getOrganizationId(), AppendToQueryInput.class.getSimpleName());
         BusinessRule addEdgeToQueryResults = businessRuleDao.get(input.getOrganizationId(), AddEdgeToQueryResults.class.getSimpleName());
+        BusinessRule removeEdgeFromQueryResults = businessRuleDao.get(input.getOrganizationId(), RemoveEdgeFromQueryResults.class.getSimpleName());
 
         if (appendToQueryInput != null || addEdgeToQueryResults != null) {
             BusinessRuleFilter businessRuleFilter = new BusinessRuleFilterImpl();
@@ -133,6 +135,7 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
             List<SentenceQueryResult> results = sentenceQueryDao.getSentences(input);
             processQueryDiscreteData(results);
             results = (addEdgeToQueryResults != null) ? businessRuleFilter.modifySentenceQueryResults(results, addEdgeToQueryResults) : results;
+            results = (removeEdgeFromQueryResults != null) ? businessRuleFilter.modifySentenceQueryResults(results, removeEdgeFromQueryResults) : results;
             return results;
         }
 
