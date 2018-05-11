@@ -4,3 +4,4 @@
 /bin/
 /.project
 /mst-sentence-service.iml
+/src/log4j.properties
