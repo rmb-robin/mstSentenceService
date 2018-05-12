@@ -11,12 +11,8 @@ import java.util.UUID;
 import com.mst.dao.*;
 import com.mst.filter.BusinessRuleFilterImpl;
 import com.mst.interfaces.dao.BusinessRuleDao;
-import com.mst.interfaces.filter.BusinessRuleFilter;
 import com.mst.model.SentenceQuery.*;
-import com.mst.model.businessRule.AddEdgeToQueryResults;
-import com.mst.model.businessRule.AppendToQueryInput;
 import com.mst.model.businessRule.BusinessRule;
-import com.mst.model.businessRule.RemoveEdgeFromQueryResults;
 import org.bson.types.ObjectId;
 import org.glassfish.hk2.api.PreDestroy;
 
@@ -50,270 +46,261 @@ import com.mst.sentenceprocessing.models.SaveSentenceTextResponse;
 import com.mst.services.mst_sentence_service.RequestsMongoDatastoreProvider;
 import com.mst.services.mst_sentence_service.SentenceServiceMongoDatastoreProvider;
 
+import static com.mst.model.businessRule.BusinessRule.RuleType.MODIFY_SENTENCE_QUERY_INPUT;
+import static com.mst.model.businessRule.BusinessRule.RuleType.MODIFY_SENTENCE_QUERY_RESULT;
 
-public class SentenceServiceImpl implements SentenceService,PreDestroy {
-	private SentenceQueryDao sentenceQueryDao; 
-	private SentenceDao sentenceDao;
-	private MongoDatastoreProvider  mongoProvider; 
-	private SentenceProcessingMetaDataInputFactory sentenceProcessingDbMetaDataInputFactory;
-	private SentenceProcessingController controller; 
-	private DiscreteDataInputProcesser discreteDataInputProcesser;
-	private DiscreteDataDao discreteDataDao;
-	private DiscreteDataDuplicationIdentifier discreteDataDuplicationIdentifier;
-//	private SentenceQueryConverter queryConverter; 
-	private final HL7ParsedRequstDaoImpl hl7RawDao;
-	private BusinessRuleDao businessRuleDao;
 
-	private static SentenceProcessingMetaDataInput metaDataInput;
-	
-	public SentenceServiceImpl(){
-		mongoProvider = new SentenceServiceMongoDatastoreProvider();
-		sentenceQueryDao = new SentenceQueryDaoImpl();
-		sentenceQueryDao.setMongoDatastoreProvider(mongoProvider);
-		sentenceDao = new SentenceDaoImpl();
-		sentenceDao.setMongoDatastoreProvider(mongoProvider);
-		sentenceProcessingDbMetaDataInputFactory = new SentenceProcessingDbMetaDataInputFactory(mongoProvider);
-		controller = new SentenceProcessingControllerImpl();
-	
-		discreteDataInputProcesser = new DiscreteDataInputProcesserImpl(mongoProvider);
-		discreteDataDao = new DiscreteDataDaoImpl();
-		discreteDataDao.setMongoDatastoreProvider(mongoProvider);
-		discreteDataDuplicationIdentifier = new DiscreteDataDuplicationIdentifierImpl();
+public class SentenceServiceImpl implements SentenceService, PreDestroy {
+    private SentenceQueryDao sentenceQueryDao;
+    private SentenceDao sentenceDao;
+    private MongoDatastoreProvider mongoProvider;
+    private SentenceProcessingMetaDataInputFactory sentenceProcessingDbMetaDataInputFactory;
+    private SentenceProcessingController controller;
+    private DiscreteDataInputProcesser discreteDataInputProcesser;
+    private DiscreteDataDao discreteDataDao;
+    private DiscreteDataDuplicationIdentifier discreteDataDuplicationIdentifier;
+    //	private SentenceQueryConverter queryConverter;
+    private final HL7ParsedRequstDaoImpl hl7RawDao;
+    private BusinessRuleDao businessRuleDao;
+    private static SentenceProcessingMetaDataInput metaDataInput;
+
+    public SentenceServiceImpl() {
+        mongoProvider = new SentenceServiceMongoDatastoreProvider();
+        sentenceQueryDao = new SentenceQueryDaoImpl();
+        sentenceQueryDao.setMongoDatastoreProvider(mongoProvider);
+        sentenceDao = new SentenceDaoImpl();
+        sentenceDao.setMongoDatastoreProvider(mongoProvider);
+        sentenceProcessingDbMetaDataInputFactory = new SentenceProcessingDbMetaDataInputFactory(mongoProvider);
+        controller = new SentenceProcessingControllerImpl();
+        discreteDataInputProcesser = new DiscreteDataInputProcesserImpl(mongoProvider);
+        discreteDataDao = new DiscreteDataDaoImpl();
+        discreteDataDao.setMongoDatastoreProvider(mongoProvider);
+        discreteDataDuplicationIdentifier = new DiscreteDataDuplicationIdentifierImpl();
 //		queryConverter = new SentenceQueryConverterImpl();
-		
-		hl7RawDao = new HL7ParsedRequstDaoImpl();
-		hl7RawDao.setMongoDatastoreProvider(new RequestsMongoDatastoreProvider());
-		businessRuleDao = new BusinessRuleDaoImpl(BusinessRule.class);
-		businessRuleDao.setMongoDatastoreProvider(mongoProvider);
-	}
-	
-	private void processQueryDiscreteData(List<SentenceQueryResult> results){
-		HashMap<String,String> reportTextByIds = new HashMap<>();
-		Map<String,DiscreteData> discreteDatasById = new HashMap<>();
-		for(SentenceQueryResult result: results){
-			String key = result.getDiscreteData().getId().toString();
-			processReportText(result, reportTextByIds);
-			if(discreteDatasById.containsKey(key)) continue;
-			discreteDatasById.put(key, result.getDiscreteData());
-		}
-		
-		List<DiscreteData> discretaDatas = new ArrayList<>(discreteDatasById.values());
-		discreteDataDuplicationIdentifier.process(discretaDatas);
-	}
-	
-	private void processReportText(SentenceQueryResult result, HashMap<String, String> reportTextByIds) {
+        hl7RawDao = new HL7ParsedRequstDaoImpl();
+        hl7RawDao.setMongoDatastoreProvider(new RequestsMongoDatastoreProvider());
+        businessRuleDao = new BusinessRuleDaoImpl(BusinessRule.class);
+        businessRuleDao.setMongoDatastoreProvider(mongoProvider);
+    }
 
-		if ( result == null || result.getDiscreteData() == null || result.getDiscreteData().getId() == null ) 
-			return;
-
-		String id = result.getDiscreteData().getParseReportId();
-		if ( reportTextByIds.containsKey(id)) {
-			result.setReportText(reportTextByIds.get(id));
-			return;
-		}
-		
-		String text = this.getSentenceTextForDiscreteDataIdByString(id);
-		reportTextByIds.put(id,  text.trim());
-		result.setReportText(reportTextByIds.get(id));
-	}
-
-	@Override 
-	public List<SentenceQueryResult> querySentences(SentenceQueryInput input) throws Exception{
-		if(input.getOrganizationId()==null)
-			throw new Exception("Missing OrgId");
-	
-		if(input.getIsNotAndAll())
-			input = new NotAndAllRequestFactoryImpl().create(input);
-
-        BusinessRule appendToQueryInput = businessRuleDao.get(input.getOrganizationId(), AppendToQueryInput.class.getSimpleName());
-        BusinessRule addEdgeToQueryResults = businessRuleDao.get(input.getOrganizationId(), AddEdgeToQueryResults.class.getSimpleName());
-        BusinessRule removeEdgeFromQueryResults = businessRuleDao.get(input.getOrganizationId(), RemoveEdgeFromQueryResults.class.getSimpleName());
-
-        if (appendToQueryInput != null || addEdgeToQueryResults != null) {
-            BusinessRuleFilter businessRuleFilter = new BusinessRuleFilterImpl();
-            input = (appendToQueryInput != null) ? businessRuleFilter.modifySentenceQueryInput(input, appendToQueryInput) : input;
-            List<SentenceQueryResult> results = sentenceQueryDao.getSentences(input);
-            processQueryDiscreteData(results);
-            results = (addEdgeToQueryResults != null) ? businessRuleFilter.modifySentenceQueryResults(results, addEdgeToQueryResults) : results;
-            results = (removeEdgeFromQueryResults != null) ? businessRuleFilter.modifySentenceQueryResults(results, removeEdgeFromQueryResults) : results;
-            return results;
+    private void processQueryDiscreteData(List<SentenceQueryResult> results) {
+        HashMap<String, String> reportTextByIds = new HashMap<>();
+        Map<String, DiscreteData> discreteDatasById = new HashMap<>();
+        for (SentenceQueryResult result : results) {
+            String key = result.getDiscreteData().getId().toString();
+            processReportText(result, reportTextByIds);
+            if (discreteDatasById.containsKey(key)) continue;
+            discreteDatasById.put(key, result.getDiscreteData());
         }
 
-		List<SentenceQueryResult> results =  sentenceQueryDao.getSentences(input);
-		processQueryDiscreteData(results);
-		return results;
-	}
-	
-	@Override 
-	public List<SentenceQueryResult> queryTextSentences(SentenceQueryTextInput input) {
-		return null;
-	}
+        List<DiscreteData> discretaDatas = new ArrayList<>(discreteDatasById.values());
+        discreteDataDuplicationIdentifier.process(discretaDatas);
+    }
 
-	@Override 
-	public void saveSentences(List<Sentence> sentences, DiscreteData discreteData, SentenceProcessingFailures sentenceProcessingFailures,boolean isReprocess, String reprocessId, String resultType){
-		List<SentenceDb> documents = new ArrayList<>();
-		for(Sentence sentence: sentences){
-			SentenceDb document = SentenceConverter.convertToDocument(sentence);
-			if(isReprocess){
-				document.setId(new ObjectId(sentence.getId()));
-				document.setReprocessId(reprocessId);
-			}
-			documents.add(document);
-		}
-		
-		if(!isReprocess){ 
-			discreteDataInputProcesser.processDiscreteData(discreteData, sentences,resultType);
-			sentenceDao.saveSentences(documents, discreteData,sentenceProcessingFailures);
-		}
-		else
-		{
-			sentenceDao.saveReprocess(documents, sentenceProcessingFailures);
-		}
-	}
-	
-	//move to other project...
-	@Override 
-	public String reprocessSentences(SentenceReprocessingInput input) {
-		controller.setMetadata(getSentenceProcessingMetadata());
-		String reprocessId = UUID.randomUUID().toString();
-		input.setReprocessId(reprocessId);
-		
-		while(true){
-			List<SentenceDb> documents = this.getSentencesForReprocessing(input);
-			if(documents.isEmpty()) return null;
-			Set<String> discreteDataIds =  reprocessSentenceBatch(documents,reprocessId);
-			List<SentenceDb> sentencesForDiscreteData = sentenceQueryDao.getSentencesByDiscreteDataIds(discreteDataIds);
-			List<Sentence> sentences = SentenceConverter.convertToSentence(sentencesForDiscreteData,true,true,false);
-			Map<String, List<Sentence>> sentencesByDiscreteData = SentenceByDiscreteDataMapper.groupSentencesByDiscretedata(sentences);
-			reprocessDiscreteData(sentencesByDiscreteData);
-			if(documents.size()< input.getTakeSize()) break;
-		}
-		return reprocessId;
-	}
-	
-	private void reprocessDiscreteData(Map<String, List<Sentence>> sentencesByDiscreteData){		
-		for(Map.Entry<String,List<Sentence>> entry: sentencesByDiscreteData.entrySet()){
-			List<Sentence> sentences = entry.getValue();
-			if(sentences.isEmpty()) continue;
-			DiscreteData discreteData = sentences.get(0).getDiscreteData();
+    private void processReportText(SentenceQueryResult result, HashMap<String, String> reportTextByIds) {
+        if (result == null || result.getDiscreteData() == null || result.getDiscreteData().getId() == null)
+            return;
 
-			cleanDiscreteDataForReprocess(discreteData);
-			discreteDataInputProcesser.processDiscreteData(discreteData, sentences, DiscreteDataBucketIdenticationType.compliance);
-			discreteDataDao.save(discreteData, true);
-		}
-	}
+        String id = result.getDiscreteData().getParseReportId();
+        if (reportTextByIds.containsKey(id)) {
+            result.setReportText(reportTextByIds.get(id));
+            return;
+        }
 
-	private Set<String> reprocessSentenceBatch(List<SentenceDb> documents, String reprocessId){
+        String text = this.getSentenceTextForDiscreteDataIdByString(id);
+        reportTextByIds.put(id, text.trim());
+        result.setReportText(reportTextByIds.get(id));
+    }
 
-		List<Sentence> sentences = SentenceConverter.convertToSentence(documents,false,false,false);
-		Set<String> discreteDataIds = new HashSet<>();
-		
-		for(Sentence sentence: sentences)
-			discreteDataIds.add(sentence.getDiscreteData().getId().toString());
-	
-		SentenceProcessingResult result = controller.reprocessSentences(sentences);
-		this.saveSentences(result.getSentences(),null,result.getFailures(),true,reprocessId, DiscreteDataBucketIdenticationType.compliance);
-		return discreteDataIds;
-	}
-	
-	private void cleanDiscreteDataForReprocess(DiscreteData discreteData){
-		discreteData.getCustomFields().clear();
-		discreteData.setBucketName(null);
-		discreteData.setIsCompliant(false);
-	}
-	
-	@Override 
-	public List<Sentence> createSentences(SentenceRequest request) throws Exception{
-    	controller.setMetadata(getSentenceProcessingMetadata());
-    	return controller.processSentences(request);
-	}
-	
-	@Override 
-	public SentenceProcessingMetaDataInput getSentenceProcessingMetadata(){
-		if(metaDataInput==null) 
-			metaDataInput = sentenceProcessingDbMetaDataInputFactory.create();
-		return metaDataInput;
-	}
+    @Override
+    public List<SentenceQueryResult> querySentences(SentenceQueryInput input) throws Exception {
+        if (input.getOrganizationId() == null)
+            throw new Exception("Missing OrgId");
 
-	@Override 
-	public SentenceProcessingResult createSentences(SentenceTextRequest request) throws Exception {
-		controller.setMetadata(getSentenceProcessingMetadata());
-		return controller.processText(request);
-	}
+        if (input.getIsNotAndAll())
+            input = new NotAndAllRequestFactoryImpl().create(input);
 
-	@Override 
-	public List<String> getEdgeNamesForTokens(List<String> tokens) {
-		Edges edges =  this.mongoProvider.getDefaultDb().createQuery(Edges.class).get();
-		return edges.getNames();
-		//return sentenceQueryDao.getEdgeNamesByTokens(tokens);
-	}
+        List<BusinessRule> modifySentenceQueryInput = businessRuleDao.get(input.getOrganizationId(), MODIFY_SENTENCE_QUERY_INPUT);
 
-	@Override
-	public List<SentenceDb> getSentencesForReprocessing(SentenceReprocessingInput input) {
-		return sentenceQueryDao.getSentencesForReprocess(input);
-	}
+        if (modifySentenceQueryInput != null)
+            new BusinessRuleFilterImpl().modifySentenceQueryInput(input, modifySentenceQueryInput);
 
-	@Override
-	public void reprocessDiscreteData(String id) {
-		Set<String> discreteDataIds = new HashSet<>();
-		discreteDataIds.add(id);
-		List<SentenceDb> sentencesForDiscreteData = sentenceQueryDao.getSentencesByDiscreteDataIds(discreteDataIds);
-		List<Sentence> sentences = SentenceConverter.convertToSentence(sentencesForDiscreteData,true,true,false);
-		Map<String, List<Sentence>> sentencesByDiscreteData = SentenceByDiscreteDataMapper.groupSentencesByDiscretedata(sentences);
-		reprocessDiscreteData(sentencesByDiscreteData);
-	}
+        List<SentenceQueryResult> results = sentenceQueryDao.getSentences(input);
+        processQueryDiscreteData(results);
+        List<BusinessRule> modifySentenceQueryResult = businessRuleDao.get(input.getOrganizationId(), MODIFY_SENTENCE_QUERY_RESULT);
 
-	@Override
-	public SaveSentenceTextResponse processSentenceTextRequest(SentenceTextRequest sentenceTextRequest) throws Exception {
-		String discreteDataResultType = DiscreteDataBucketIdenticationType.compliance;
-		if(sentenceTextRequest.isNeedResult())
-			discreteDataResultType = DiscreteDataBucketIdenticationType.followup;
-	
-		SentenceProcessingResult result = this.createSentences(sentenceTextRequest);
-    	this.saveSentences(result.getSentences(), sentenceTextRequest.getDiscreteData(),result.getFailures(),false,null,discreteDataResultType);
-    	if(sentenceTextRequest.isNeedResult()){
-    		return SaveSentenceTextResponseFactory.
-    				create(sentenceTextRequest.getDiscreteData().getId().toString(), sentenceTextRequest.getDiscreteData().getExpectedFollowup());
-    		
-    	}
-    	return null;
-	}
+        if (modifySentenceQueryResult != null)
+            new BusinessRuleFilterImpl().modifySentenceQueryResults(results, modifySentenceQueryResult);
 
-	@Override
-	public void preDestroy() {
+        return results;
+    }
+
+    @Override
+    public List<SentenceQueryResult> queryTextSentences(SentenceQueryTextInput input) {
+        return null;
+    }
+
+    @Override
+    public void saveSentences(List<Sentence> sentences, DiscreteData discreteData, SentenceProcessingFailures sentenceProcessingFailures, boolean isReprocess, String reprocessId, String resultType) {
+        List<SentenceDb> documents = new ArrayList<>();
+        for (Sentence sentence : sentences) {
+            SentenceDb document = SentenceConverter.convertToDocument(sentence);
+            if (isReprocess) {
+                document.setId(new ObjectId(sentence.getId()));
+                document.setReprocessId(reprocessId);
+            }
+            documents.add(document);
+        }
+
+        if (!isReprocess) {
+            discreteDataInputProcesser.processDiscreteData(discreteData, sentences, resultType);
+            sentenceDao.saveSentences(documents, discreteData, sentenceProcessingFailures);
+        } else {
+            sentenceDao.saveReprocess(documents, sentenceProcessingFailures);
+        }
+    }
+
+    //move to other project...
+    @Override
+    public String reprocessSentences(SentenceReprocessingInput input) {
+        controller.setMetadata(getSentenceProcessingMetadata());
+        String reprocessId = UUID.randomUUID().toString();
+        input.setReprocessId(reprocessId);
+
+        while (true) {
+            List<SentenceDb> documents = this.getSentencesForReprocessing(input);
+            if (documents.isEmpty()) return null;
+            Set<String> discreteDataIds = reprocessSentenceBatch(documents, reprocessId);
+            List<SentenceDb> sentencesForDiscreteData = sentenceQueryDao.getSentencesByDiscreteDataIds(discreteDataIds);
+            List<Sentence> sentences = SentenceConverter.convertToSentence(sentencesForDiscreteData, true, true, false);
+            Map<String, List<Sentence>> sentencesByDiscreteData = SentenceByDiscreteDataMapper.groupSentencesByDiscretedata(sentences);
+            reprocessDiscreteData(sentencesByDiscreteData);
+            if (documents.size() < input.getTakeSize()) break;
+        }
+        return reprocessId;
+    }
+
+    private void reprocessDiscreteData(Map<String, List<Sentence>> sentencesByDiscreteData) {
+        for (Map.Entry<String, List<Sentence>> entry : sentencesByDiscreteData.entrySet()) {
+            List<Sentence> sentences = entry.getValue();
+            if (sentences.isEmpty()) continue;
+            DiscreteData discreteData = sentences.get(0).getDiscreteData();
+
+            cleanDiscreteDataForReprocess(discreteData);
+            discreteDataInputProcesser.processDiscreteData(discreteData, sentences, DiscreteDataBucketIdenticationType.compliance);
+            discreteDataDao.save(discreteData, true);
+        }
+    }
+
+    private Set<String> reprocessSentenceBatch(List<SentenceDb> documents, String reprocessId) {
+        List<Sentence> sentences = SentenceConverter.convertToSentence(documents, false, false, false);
+        Set<String> discreteDataIds = new HashSet<>();
+
+        for (Sentence sentence : sentences)
+            discreteDataIds.add(sentence.getDiscreteData().getId().toString());
+
+        SentenceProcessingResult result = controller.reprocessSentences(sentences);
+        this.saveSentences(result.getSentences(), null, result.getFailures(), true, reprocessId, DiscreteDataBucketIdenticationType.compliance);
+        return discreteDataIds;
+    }
+
+    private void cleanDiscreteDataForReprocess(DiscreteData discreteData) {
+        discreteData.getCustomFields().clear();
+        discreteData.setBucketName(null);
+        discreteData.setIsCompliant(false);
+    }
+
+    @Override
+    public List<Sentence> createSentences(SentenceRequest request) throws Exception {
+        controller.setMetadata(getSentenceProcessingMetadata());
+        return controller.processSentences(request);
+    }
+
+    @Override
+    public SentenceProcessingMetaDataInput getSentenceProcessingMetadata() {
+        if (metaDataInput == null)
+            metaDataInput = sentenceProcessingDbMetaDataInputFactory.create();
+        return metaDataInput;
+    }
+
+    @Override
+    public SentenceProcessingResult createSentences(SentenceTextRequest request) throws Exception {
+        controller.setMetadata(getSentenceProcessingMetadata());
+        return controller.processText(request);
+    }
+
+    @Override
+    public List<String> getEdgeNamesForTokens(List<String> tokens) {
+        Edges edges = this.mongoProvider.getDefaultDb().createQuery(Edges.class).get();
+        return edges.getNames();
+        //return sentenceQueryDao.getEdgeNamesByTokens(tokens);
+    }
+
+    @Override
+    public List<SentenceDb> getSentencesForReprocessing(SentenceReprocessingInput input) {
+        return sentenceQueryDao.getSentencesForReprocess(input);
+    }
+
+    @Override
+    public void reprocessDiscreteData(String id) {
+        Set<String> discreteDataIds = new HashSet<>();
+        discreteDataIds.add(id);
+        List<SentenceDb> sentencesForDiscreteData = sentenceQueryDao.getSentencesByDiscreteDataIds(discreteDataIds);
+        List<Sentence> sentences = SentenceConverter.convertToSentence(sentencesForDiscreteData, true, true, false);
+        Map<String, List<Sentence>> sentencesByDiscreteData = SentenceByDiscreteDataMapper.groupSentencesByDiscretedata(sentences);
+        reprocessDiscreteData(sentencesByDiscreteData);
+    }
+
+    @Override
+    public SaveSentenceTextResponse processSentenceTextRequest(SentenceTextRequest sentenceTextRequest) throws Exception {
+        String discreteDataResultType = DiscreteDataBucketIdenticationType.compliance;
+        if (sentenceTextRequest.isNeedResult())
+            discreteDataResultType = DiscreteDataBucketIdenticationType.followup;
+
+        SentenceProcessingResult result = this.createSentences(sentenceTextRequest);
+        this.saveSentences(result.getSentences(), sentenceTextRequest.getDiscreteData(), result.getFailures(), false, null, discreteDataResultType);
+        if (sentenceTextRequest.isNeedResult()) {
+            return SaveSentenceTextResponseFactory.
+                    create(sentenceTextRequest.getDiscreteData().getId().toString(), sentenceTextRequest.getDiscreteData().getExpectedFollowup());
+
+        }
+        return null;
+    }
+
+    @Override
+    public void preDestroy() {
 //		mongoProvider.shutDown();
-	}
+    }
 
-	@Override
-	public void saveEdges(Edges edges) {
-		this.mongoProvider.getDefaultDb().save(edges);
-	}
+    @Override
+    public void saveEdges(Edges edges) {
+        this.mongoProvider.getDefaultDb().save(edges);
+    }
 
-	private String getSentenceTextForDiscreteDataIdByString(String parsedFileId) {
+    private String getSentenceTextForDiscreteDataIdByString(String parsedFileId) {
+        if (parsedFileId == null) return "";
+        HL7ParsedRequst parsedRequest = hl7RawDao.get(parsedFileId);
+        if (parsedRequest == null) return "";
 
-		if(parsedFileId==null) return "";
-		HL7ParsedRequst parsedRequest =  hl7RawDao.get(parsedFileId);
-		if(parsedRequest==null)return "";
-		
-		return parsedRequest.getText();
-	}
+        return parsedRequest.getText();
+    }
 
-	@Override
-	public List<String> getSentenceTextForDiscreteDataId(String discreteDataId) {
-		List<SentenceDb> sentences = sentenceQueryDao.getSentencesForDiscreteDataId(discreteDataId);
-		List<String> result = new ArrayList<>();
-		
-		for(SentenceDb sentenceDb: sentences){
-			result.add(sentenceDb.getOrigSentence());
-		}
-		return result;
-	}
+    @Override
+    public List<String> getSentenceTextForDiscreteDataId(String discreteDataId) {
+        List<SentenceDb> sentences = sentenceQueryDao.getSentencesForDiscreteDataId(discreteDataId);
+        List<String> result = new ArrayList<>();
 
-	@Override
-	public void RemoveNonDisplayEdges(List<SentenceQueryResult> queryResults) {
-		for(SentenceQueryResult queryResult : queryResults) {
-			List<SentenceQueryEdgeResult> edgeResults = queryResult.getSentenceQueryEdgeResults();
-			edgeResults.removeIf(r -> !r.isDisplayEdge());
-		}
-	}
+        for (SentenceDb sentenceDb : sentences) {
+            result.add(sentenceDb.getOrigSentence());
+        }
+        return result;
+    }
+
+    @Override
+    public void RemoveNonDisplayEdges(List<SentenceQueryResult> queryResults) {
+        for (SentenceQueryResult queryResult : queryResults) {
+            List<SentenceQueryEdgeResult> edgeResults = queryResult.getSentenceQueryEdgeResults();
+            edgeResults.removeIf(r -> !r.isDisplayEdge());
+        }
+    }
 }
