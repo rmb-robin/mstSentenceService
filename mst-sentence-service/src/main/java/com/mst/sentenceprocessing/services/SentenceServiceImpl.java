@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import com.mst.dao.*;
 import com.mst.filter.BusinessRuleFilterImpl;
+import com.mst.filter.RemoveNonQueryEdgesFromResult;
 import com.mst.interfaces.dao.BusinessRuleDao;
 import com.mst.model.SentenceQuery.*;
 import com.mst.model.businessRule.BusinessRule;
@@ -130,8 +131,9 @@ public class SentenceServiceImpl implements SentenceService, PreDestroy {
         List<BusinessRule> modifySentenceQueryResult = businessRuleDao.get(input.getOrganizationId(), MODIFY_SENTENCE_QUERY_RESULT);
 
         if (modifySentenceQueryResult != null)
-            new BusinessRuleFilterImpl().modifySentenceQueryResults(results, modifySentenceQueryResult);
+            new BusinessRuleFilterImpl().modifySentenceQueryResult(results, modifySentenceQueryResult);
 
+        new RemoveNonQueryEdgesFromResult().process(input, results);
         return results;
     }
 
