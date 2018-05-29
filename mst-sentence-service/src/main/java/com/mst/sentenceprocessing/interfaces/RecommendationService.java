@@ -3,13 +3,9 @@ package com.mst.sentenceprocessing.interfaces;
 import java.util.List;
 
 import com.mst.model.autocomplete.AutoCompleteRequest;
-import com.mst.model.recommandation.SentenceDiscovery;
-import com.mst.model.requests.RecommandationRequest;
 import com.mst.model.requests.SentenceTextRequest;
-import com.mst.model.sentenceProcessing.Sentence;
 
-public interface RecommandationService {
-
+public interface RecommendationService {
 	void reloadCache();
 	List<String> getAutoComplete(AutoCompleteRequest autoCompleteRequest);
 	void saveSentenceDiscoveryProcess(SentenceTextRequest request) throws Exception;

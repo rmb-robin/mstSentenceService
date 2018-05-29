@@ -21,7 +21,7 @@ import com.mst.filter.NotAndAllRequestFactoryImpl;
 import com.mst.interfaces.DiscreteDataDao;
 import com.mst.interfaces.MongoDatastoreProvider;
 import com.mst.interfaces.sentenceprocessing.DiscreteDataDuplicationIdentifier;
-import com.mst.interfaces.sentenceprocessing.DiscreteDataInputProcesser;
+import com.mst.interfaces.sentenceprocessing.DiscreteDataInputProcessor;
 import com.mst.interfaces.sentenceprocessing.SentenceProcessingController;
 import com.mst.interfaces.SentenceProcessingMetaDataInputFactory;
 import com.mst.interfaces.dao.SentenceDao;
@@ -37,7 +37,7 @@ import com.mst.model.sentenceProcessing.SentenceProcessingFailures;
 import com.mst.model.sentenceProcessing.SentenceProcessingMetaDataInput;
 import com.mst.model.sentenceProcessing.SentenceProcessingResult;
 import com.mst.sentenceprocessing.DiscreteDataDuplicationIdentifierImpl;
-import com.mst.sentenceprocessing.DiscreteDataInputProcesserImpl;
+import com.mst.sentenceprocessing.DiscreteDataInputProcessorImpl;
 import com.mst.sentenceprocessing.SentenceConverter;
 import com.mst.sentenceprocessing.SentenceProcessingControllerImpl;
 import com.mst.sentenceprocessing.dao.SentenceProcessingDbMetaDataInputFactory;
@@ -59,7 +59,7 @@ public class SentenceServiceImpl implements SentenceService, PreDestroy {
     private MongoDatastoreProvider mongoProvider;
     private SentenceProcessingMetaDataInputFactory sentenceProcessingDbMetaDataInputFactory;
     private SentenceProcessingController controller;
-    private DiscreteDataInputProcesser discreteDataInputProcesser;
+    private DiscreteDataInputProcessor discreteDataInputProcessor;
     private DiscreteDataDao discreteDataDao;
     private DiscreteDataDuplicationIdentifier discreteDataDuplicationIdentifier;
     private final HL7ParsedRequstDaoImpl hl7RawDao;
@@ -74,7 +74,7 @@ public class SentenceServiceImpl implements SentenceService, PreDestroy {
         sentenceDao.setMongoDatastoreProvider(mongoProvider);
         sentenceProcessingDbMetaDataInputFactory = new SentenceProcessingDbMetaDataInputFactory(mongoProvider);
         controller = new SentenceProcessingControllerImpl();
-        discreteDataInputProcesser = new DiscreteDataInputProcesserImpl(mongoProvider);
+        discreteDataInputProcessor = new DiscreteDataInputProcessorImpl(mongoProvider);
         discreteDataDao = new DiscreteDataDaoImpl();
         discreteDataDao.setMongoDatastoreProvider(mongoProvider);
         discreteDataDuplicationIdentifier = new DiscreteDataDuplicationIdentifierImpl();
@@ -120,7 +120,7 @@ public class SentenceServiceImpl implements SentenceService, PreDestroy {
             documents.add(document);
         }
         if (!isReprocess) {
-            discreteDataInputProcesser.processDiscreteData(discreteData, sentences, resultType);
+            discreteDataInputProcessor.processDiscreteData(discreteData, sentences, resultType);
             sentenceDao.saveSentences(documents, discreteData, sentenceProcessingFailures);
         } else {
             sentenceDao.saveReprocess(documents, sentenceProcessingFailures);
@@ -243,7 +243,7 @@ public class SentenceServiceImpl implements SentenceService, PreDestroy {
                 continue;
             DiscreteData discreteData = sentences.get(0).getDiscreteData();
             cleanDiscreteDataForReprocess(discreteData);
-            discreteDataInputProcesser.processDiscreteData(discreteData, sentences, DiscreteDataBucketIdenticationType.compliance);
+            discreteDataInputProcessor.processDiscreteData(discreteData, sentences, DiscreteDataBucketIdenticationType.compliance);
             discreteDataDao.save(discreteData, true);
         }
     }

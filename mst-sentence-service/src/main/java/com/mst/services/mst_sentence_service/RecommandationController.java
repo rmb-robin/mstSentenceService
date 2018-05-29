@@ -9,19 +9,17 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
 import com.mst.model.autocomplete.AutoCompleteRequest;
-import com.mst.model.recommandation.SentenceDiscovery;
-import com.mst.model.requests.RecommandationRequest;
 import com.mst.model.requests.SentenceTextRequest;
-import com.mst.sentenceprocessing.interfaces.RecommandationService;
-import com.mst.sentenceprocessing.services.RecommandationServiceImpl;
+import com.mst.sentenceprocessing.interfaces.RecommendationService;
+import com.mst.sentenceprocessing.services.RecommendationServiceImpl;
  
 @Path("recommandation")
 public class RecommandationController {
 
-	private RecommandationService service; 
+	private RecommendationService service;
 	
 	public RecommandationController() {
-		service = new RecommandationServiceImpl();
+		service = new RecommendationServiceImpl();
 	}
 	
 	@POST
