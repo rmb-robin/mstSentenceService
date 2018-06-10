@@ -36,7 +36,7 @@ public class RawReportController {
                 throw new Exception("Missing Hl7 Details");
             HL7Details details = detailsList.get(0);
             AllHl7Elements allHl7Elements = reportsService.getAllHl7Elements();
-            ParseHl7Result parsedResult = rawReportService.getSetenceTextRequestFromRaw(details, file, allHl7Elements);
+            ParseHl7Result parsedResult = rawReportService.getSentenceTextRequestFromRaw(details, file, allHl7Elements);
             SentenceTextRequest request = parsedResult.getSentenceTextRequest();
             request.getDiscreteData().setOrganizationId(file.getOrgId());
             request.getDiscreteData().setAllAvailableFields(parsedResult.getAllFields());
