@@ -55,6 +55,39 @@ public class RawReportServiceImpl implements RawReportService {
 		result.setFileId(id);
 		return result;
 	}
+	
+	
+	
+	public RawFileSaveResult reprocess(SentenceTextRequest request,RawReportFile file) {
+		LocalDate now = LocalDate.now();
+		HL7ParsedRequst existingRequest = hl7ParsedRequstDao.filter(request);
+		
+		if(existingRequest==null) return null; 
+		
+		
+		existingRequest.getDiscreteData();
+		
+		
+		
+		
+		
+		
+		RawFileSaveResult result = new RawFileSaveResult();
+		if(existingRequest !=null){
+			file = dao.get(existingRequest.getRawFileId());
+			file.getSubmittedDates().add(now);
+			dao.save(file);
+			result.setDuplicate(true);
+			result.setFileId(existingRequest.getRawFileId());
+			return result;
+		}
+		
+		file.getSubmittedDates().add(now);
+		String id =  dao.save(file);
+		result.setFileId(id);
+		return result;
+	}
+	
 
 	public ParseHl7Result getSetentenceTextRequestFromRaw(HL7Details detail,RawReportFile file, AllHl7Elements allElements) throws HL7Exception{
 		HL7Parser parser = new HL7Parser();

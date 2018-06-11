@@ -8,6 +8,7 @@ import org.mongodb.morphia.query.Query;
 import com.mst.interfaces.MongoDatastoreProvider;
 import com.mst.interfaces.SentenceProcessingMetaDataInputFactory;
 import com.mst.model.sentenceProcessing.DynamicEdgeCreationRule;
+import com.mst.model.sentenceProcessing.IterationRuleProcesserInput;
 import com.mst.model.sentenceProcessing.SentenceProcessingMetaDataInput;
 import com.mst.services.mst_sentence_service.Constants;
 
@@ -18,7 +19,6 @@ public class SentenceProcessingDbMetaDataInputFactory implements SentenceProcess
 	public SentenceProcessingDbMetaDataInputFactory(MongoDatastoreProvider mongoProvider){
 		this.mongoProvider = mongoProvider;
 	}
-
 	
 	public SentenceProcessingMetaDataInput create(boolean isSentenceProcessing) {
 		Query<SentenceProcessingMetaDataInput> query = mongoProvider.getDefaultDb().createQuery(SentenceProcessingMetaDataInput.class);
@@ -33,12 +33,19 @@ public class SentenceProcessingDbMetaDataInputFactory implements SentenceProcess
 		return query.asList();		
 	}
 
-
+	
+	private IterationRuleProcesserInput getIterationRuleInput(){
+		Query<IterationRuleProcesserInput> query = mongoProvider.getDefaultDb().createQuery(IterationRuleProcesserInput.class);
+		return query.get();
+	}
+	
+	
 	@Override
 	public SentenceProcessingMetaDataInput create() {
 		Query<SentenceProcessingMetaDataInput> query = mongoProvider.getDefaultDb().createQuery(SentenceProcessingMetaDataInput.class);	
 		SentenceProcessingMetaDataInput meta =  query.get();
 		meta.setDynamicEdgeCreationRules(getRules());
+		meta.setIterationRuleProcesserInput(getIterationRuleInput());
 		return meta;
 	}
 }

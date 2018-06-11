@@ -37,6 +37,21 @@ public class RecommandationController {
     	}
     }
 	
+	
+	@POST
+	@Path("/save")
+	public Response saveRecommandation(SentenceTextRequest request) throws Exception{
+    	try{
+    		service.saveSentenceDiscoveryProcess(request);
+    		return Response.status(200).entity("discoveries Saved successfully").build();
+    		
+    	}
+    	catch(Exception ex){
+    		return Response.status(500).entity(ex.getMessage()).build();
+    	}
+    }
+	
+	
 	@POST 
 	@Path("/reload")
 	public Response reload(){
