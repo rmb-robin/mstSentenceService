@@ -21,7 +21,6 @@ import com.mst.interfaces.SentenceProcessingMetaDataInputFactory;
 import com.mst.interfaces.dao.RecommendedTokenRelationshipDao;
 import com.mst.interfaces.dao.SentenceDiscoveryDao;
 import com.mst.interfaces.filter.FriendOfFriendService;
-import com.mst.interfaces.sentenceprocessing.RecommendedNounPhraseProcesser;
 import com.mst.interfaces.sentenceprocessing.SentenceDiscoveryProcessor;
 import com.mst.model.autocomplete.AutoCompleteRequest;
 import com.mst.model.discrete.DiscreteData;
@@ -33,7 +32,7 @@ import com.mst.model.requests.SentenceTextRequest;
 import com.mst.model.sentenceProcessing.SentenceProcessingMetaDataInput;
 import com.mst.model.sentenceProcessing.TokenRelationship;
 import com.mst.sentenceprocessing.RecommendationEdgesVerificationProcesser;
-import com.mst.sentenceprocessing.RecommendedNounPhraseProcesserImpl;
+
 import com.mst.sentenceprocessing.SentenceDiscoveryProcessorImpl;
 import com.mst.sentenceprocessing.dao.SentenceProcessingDbMetaDataInputFactory;
 import com.mst.sentenceprocessing.interfaces.RecommandationService;
@@ -51,7 +50,6 @@ public class RecommandationServiceImpl implements RecommandationService {
 	private RecommendedTokenRelationshipCacheManager cacheManger; 
 	private RecommendedTokenRelationshipAutocompleteQuery recommendedTokenRelationshipAutocompleteQuery;
 	private FriendOfFriendService friendOfFriendService;
-	private RecommendedNounPhraseProcesser nounPhraseProcesser;
 	
 	private static SentenceProcessingMetaDataInput input; 
 	
@@ -67,7 +65,6 @@ public class RecommandationServiceImpl implements RecommandationService {
 		cacheManger = new RecommendedTokenRelationshipCacheManagerImpl();
 		recommendedTokenRelationshipAutocompleteQuery = new RecommendedTokenRelationshipAutocompleteQueryImpl();
 		friendOfFriendService = new FriendOfFriendServiceImpl();
-		nounPhraseProcesser = new RecommendedNounPhraseProcesserImpl();
 	}
 
 	public List<SentenceDiscovery> createSentenceDiscovery(SentenceTextRequest request, SentenceProcessingMetaDataInput input) throws Exception {
@@ -101,6 +98,11 @@ public class RecommandationServiceImpl implements RecommandationService {
 			if(existingMap.containsKey(recommandedTokenRelationship.getKey())){
 					RecommendedTokenRelationship existingRelationship = existingMap.get(recommandedTokenRelationship.getKey());
 					if(existingRelationship.getTokenRelationship().getEdgeName().equals(recommandedTokenRelationship.getTokenRelationship().getEdgeName())){
+						existingRelationship.getTokenRelationship().getFromToken().setPosition(
+								recommandedTokenRelationship.getTokenRelationship().getFromToken().getPosition());
+						
+						existingRelationship.getTokenRelationship().getToToken().setPosition(
+								recommandedTokenRelationship.getTokenRelationship().getToToken().getPosition());
 						result.add(existingRelationship);
 						continue;
 					}
