@@ -13,7 +13,6 @@ import com.mst.model.sentenceProcessing.SentenceDb;
 import com.mst.model.sentenceProcessing.SentenceProcessingFailures;
 import com.mst.model.sentenceProcessing.SentenceProcessingMetaDataInput;
 import com.mst.model.sentenceProcessing.SentenceProcessingResult;
-import com.mst.model.sentenceProcessing.TokenRelationship;
 import com.mst.sentenceprocessing.models.Edges;
 import com.mst.sentenceprocessing.models.SaveSentenceTextResponse;
 
@@ -32,4 +31,5 @@ public interface SentenceService {
 	SaveSentenceTextResponse processSentenceTextRequest(SentenceTextRequest request) throws Exception;
 	void saveEdges(Edges edges);
 	List<String> getSentenceTextForDiscreteDataId(String discreteDataId);
+	void RemoveNonDisplayEdges(List<SentenceQueryResult> queryResults);
 }

@@ -14,30 +14,22 @@ import com.mst.model.metadataTypes.DiscreteDataBucketIdenticationType;
 import com.mst.model.requests.SentenceRequest;
 import com.mst.model.requests.SentenceTextRequest;
 import com.mst.model.sentenceProcessing.Sentence;
-import com.mst.model.sentenceProcessing.SentenceDb;
 import com.mst.model.sentenceProcessing.SentenceProcessingMetaDataInput;
-import com.mst.model.sentenceProcessing.TokenRelationship;
-import com.mst.sentenceprocessing.interfaces.RecommandationService;
 import com.mst.sentenceprocessing.interfaces.QueryService;
 import com.mst.sentenceprocessing.interfaces.SentenceService;
 import com.mst.sentenceprocessing.models.Edges;
 import com.mst.sentenceprocessing.models.TextResponse;
-import com.mst.sentenceprocessing.services.RecommandationServiceImpl;
 import com.mst.sentenceprocessing.services.QueryServiceImpl;
 import com.mst.sentenceprocessing.services.SentenceServiceImpl;
-import com.mst.util.TokenRelationshipUtil;
 
 @Path("sentence")
 public class SentenceController {
-
 	private final SentenceService sentenceService;
 	private final QueryService queryService;
-	private final RecommandationService recommandationService;
 
-	public SentenceController() {
+    public SentenceController() {
 		sentenceService = new SentenceServiceImpl();
 		queryService = new QueryServiceImpl();
-		recommandationService = new RecommandationServiceImpl();
 	}
 
 	@POST
@@ -64,7 +56,7 @@ public class SentenceController {
 
 	@POST
 	@Path("/save")
-	public Response saveSentence(SentenceRequest request) throws Exception {
+	public Response saveSentence(SentenceRequest request) {
 		try {
 			List<Sentence> sentences = sentenceService.createSentences(request);
 			sentenceService.saveSentences(sentences, request.getDiscreteData(), null, false, null,
@@ -77,7 +69,7 @@ public class SentenceController {
 
 	@POST
 	@Path("/reprocess")
-	public Response reprocess(SentenceReprocessingInput input) throws Exception {
+	public Response reprocess(SentenceReprocessingInput input) {
 		try {
 			String reprocessId = sentenceService.reprocessSentences(input);
 			return Response.status(200).entity(reprocessId).build();
@@ -88,7 +80,7 @@ public class SentenceController {
 
 	@GET
 	@Path("/reprocessdiscretedata/{id}")
-	public Response reprocessDiscreteData(@PathParam("id") String id) throws Exception{
+	public Response reprocessDiscreteData(@PathParam("id") String id) {
     	try{
     		sentenceService.reprocessDiscreteData(id);
     		return Response.status(200).entity("reprocessing successfully").build();
@@ -123,8 +115,8 @@ public class SentenceController {
 	    	input.setFilterByReport(true);
 	    	input.setFilterByTokenSequence(true);
     		List<SentenceQueryResult> queryResults = sentenceService.querySentences(input);
+    		sentenceService.RemoveNonDisplayEdges(queryResults);
 	    	SentenceQueryOutput result = new SentenceQueryOutput();
-
 	    	result.setSentenceQueryResults(queryResults);
 	    	result.setSize(queryResults.size());
 	    	return Response.status(200).entity(result).build(); 
@@ -134,7 +126,6 @@ public class SentenceController {
     		return Response.status(500).entity(ex.getMessage()).build();
     	}
     }
-
             
 	@POST
 	@Path("/querytext")
@@ -151,7 +142,6 @@ public class SentenceController {
 		}
 	}
 
-    
     @GET
     @Path("/getsentencetextfordiscreteid/{id}")
     public Response getSentenceTextForDiscreteId(@PathParam("id") String id){
@@ -163,6 +153,7 @@ public class SentenceController {
     		return Response.status(500).entity(ex.getMessage()).build();
     	}
     }
+
 	@GET
 	@Path("processingdata")
 	public Response getProcessingData() {

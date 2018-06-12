@@ -8,23 +8,20 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.persistence.internal.jpa.parsing.AliasableNode;
-
 import com.mst.model.HL7Details;
 import com.mst.model.raw.AllHl7Elements;
 import com.mst.model.raw.ParseHl7Result;
 import com.mst.model.raw.RawReportFile;
 import com.mst.model.requests.RejectedReport;
 import com.mst.model.requests.SentenceTextRequest;
-import com.mst.sentenceprocessing.SentenceConverter;
 import com.mst.sentenceprocessing.interfaces.RawReportService;
-import com.mst.sentenceprocessing.interfaces.RecommandationService;
+import com.mst.sentenceprocessing.interfaces.RecommendationService;
 import com.mst.sentenceprocessing.interfaces.ReportsService;
 import com.mst.sentenceprocessing.interfaces.SentenceService;
 import com.mst.sentenceprocessing.models.RawFileSaveResult;
 import com.mst.sentenceprocessing.models.TextResponse;
 import com.mst.sentenceprocessing.services.RawReportServiceImpl;
-import com.mst.sentenceprocessing.services.RecommandationServiceImpl;
+import com.mst.sentenceprocessing.services.RecommendationServiceImpl;
 import com.mst.sentenceprocessing.services.ReportsServiceImpl;
 import com.mst.sentenceprocessing.services.SentenceServiceImpl;
 
@@ -33,7 +30,7 @@ public class RawReportController {
 
 	private RawReportService service = new RawReportServiceImpl();
 	private ReportsService reportsService = new ReportsServiceImpl();
-	private RecommandationService recommandationService = new RecommandationServiceImpl();
+	private RecommendationService recommendationService = new RecommendationServiceImpl();
 	private SentenceService sentenceService = new SentenceServiceImpl(); 
 	
 	
