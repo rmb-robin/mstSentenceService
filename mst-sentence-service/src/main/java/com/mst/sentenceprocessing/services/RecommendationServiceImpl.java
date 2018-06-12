@@ -161,10 +161,10 @@ public class RecommendationServiceImpl implements RecommendationService {
 
 	private List<RecommendedTokenRelationship> filter(List<RecommendedTokenRelationship> existing){
 		List<RecommendedTokenRelationship> result = new ArrayList<>();
-		for(RecommendedTokenRelationship recommandedTokenRelationship: existing){
-			String edgeName = recommandedTokenRelationship.getTokenRelationship().getEdgeName();
-			if(edgeName.equals(WordEmbeddingTypes.defaultEdge) || edgeName.equals(WordEmbeddingTypes.secondPrep) || edgeName.equals(WordEmbeddingTypes.secondVerb) || edgeName.equals(WordEmbeddingTypes.firstPrep) || edgeName.equals(WordEmbeddingTypes.firstVerb) )
-				result.add(recommandedTokenRelationship);
+		for(RecommendedTokenRelationship recommendedTokenRelationship: existing){
+			String edgeName = recommendedTokenRelationship.getTokenRelationship().getEdgeName();
+			if(edgeName.equals(WordEmbeddingTypes.tokenToken) || edgeName.equals(WordEmbeddingTypes.prepMinus) || edgeName.equals(WordEmbeddingTypes.verbMinus) || edgeName.equals(WordEmbeddingTypes.prepPlus) || edgeName.equals(WordEmbeddingTypes.verbPlus) )
+				result.add(recommendedTokenRelationship);
 		}
 		return result;
 	}
