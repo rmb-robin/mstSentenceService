@@ -18192,3 +18192,104 @@ java.lang.ClassCastException: org.eclipse.ui.internal.part.NullEditorInput canno
 2018-06-12 12:29:59,706 [Worker-257] INFO  o.e.m.w.i.f.ResourceFilteringBuildParticipant - Changed resources require a complete clean of filtered resources of mst-sentence-service
 2018-06-12 12:29:59,711 [Worker-257] INFO  o.e.m.w.i.f.ResourceFilteringBuildParticipant - Executing resource filtering for mst-sentence-service
 2018-06-12 12:29:59,720 [Worker-257] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 13:12:24,408 [Worker-278] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 13:12:24,412 [Worker-278] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2018-06-12 13:12:24,418 [Worker-278] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 13:12:24,423 [Worker-278] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\user1\Documents\mstSentenceService\mstSentenceService\mst-sentence-service\src\test\resources
+2018-06-12 13:12:27,215 [Worker-279] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.maven.ide.eclipse.wtp.WarLifecycleMapping lifecycle mapping for MavenProject: com.mst.services:mst-sentence-service:0.0.1-SNAPSHOT @ C:\Users\user1\Documents\mstSentenceService\mstSentenceService\mst-sentence-service\pom.xml.
+2018-06-12 13:12:29,557 [Worker-279] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 13:12:29,564 [Worker-279] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2018-06-12 13:12:29,567 [Worker-279] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 13:12:29,567 [Worker-279] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\user1\Documents\mstSentenceService\mstSentenceService\mst-sentence-service\src\test\resources
+2018-06-12 13:12:29,572 [Worker-279] INFO  o.e.m.w.i.f.ResourceFilteringBuildParticipant - Changed resources require a complete clean of filtered resources of mst-sentence-service
+2018-06-12 13:12:29,572 [Worker-279] INFO  o.e.m.w.i.f.ResourceFilteringBuildParticipant - Executing resource filtering for mst-sentence-service
+2018-06-12 13:12:29,575 [Worker-279] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 13:12:31,619 [Worker-279] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 13:12:31,621 [Worker-279] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2018-06-12 13:12:31,629 [Worker-279] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 13:12:31,635 [Worker-279] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\user1\Documents\mstSentenceService\mstSentenceService\mst-sentence-service\src\test\resources
+2018-06-12 13:12:32,665 [Worker-279] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 13:12:32,680 [Worker-279] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2018-06-12 13:12:32,694 [Worker-279] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 13:12:32,710 [Worker-279] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\user1\Documents\mstSentenceService\mstSentenceService\mst-sentence-service\src\test\resources
+2018-06-12 15:41:03,353 [Worker-5] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.maven.ide.eclipse.wtp.WarLifecycleMapping lifecycle mapping for MavenProject: com.mst.services:mst-sentence-service:0.0.1-SNAPSHOT @ C:\Users\user1\Documents\mstSentenceService\mstSentenceService\mst-sentence-service\pom.xml.
+2018-06-12 15:41:07,789 [Worker-5] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 15:41:07,795 [Worker-5] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2018-06-12 15:41:07,800 [Worker-5] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 15:41:07,800 [Worker-5] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\user1\Documents\mstSentenceService\mstSentenceService\mst-sentence-service\src\test\resources
+2018-06-12 15:42:10,759 [Worker-0] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 15:42:10,764 [Worker-0] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2018-06-12 15:42:10,765 [Worker-0] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 15:42:10,765 [Worker-0] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\user1\Documents\mstSentenceService\mstSentenceService\mst-sentence-service\src\test\resources
+2018-06-12 15:43:37,943 [Worker-2] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 15:43:37,947 [Worker-2] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2018-06-12 15:43:37,949 [Worker-2] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 15:43:37,949 [Worker-2] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\user1\Documents\mstSentenceService\mstSentenceService\mst-sentence-service\src\test\resources
+2018-06-12 15:45:25,695 [Worker-20] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 15:45:25,696 [Worker-20] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2018-06-12 15:45:25,696 [Worker-20] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 15:45:25,701 [Worker-20] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\user1\Documents\mstSentenceService\mstSentenceService\mst-sentence-service\src\test\resources
+2018-06-12 15:45:40,301 [Worker-21] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 15:45:40,301 [Worker-21] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2018-06-12 15:45:40,302 [Worker-21] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 15:45:40,309 [Worker-21] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\user1\Documents\mstSentenceService\mstSentenceService\mst-sentence-service\src\test\resources
+2018-06-12 15:45:50,675 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 15:45:50,680 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2018-06-12 15:45:50,685 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 15:45:50,690 [Worker-12] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\user1\Documents\mstSentenceService\mstSentenceService\mst-sentence-service\src\test\resources
+2018-06-12 15:46:59,360 [Worker-2] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 15:46:59,361 [Worker-2] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2018-06-12 15:46:59,362 [Worker-2] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 15:46:59,366 [Worker-2] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\user1\Documents\mstSentenceService\mstSentenceService\mst-sentence-service\src\test\resources
+2018-06-12 15:47:37,861 [Worker-21] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 15:47:37,867 [Worker-21] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2018-06-12 15:47:37,874 [Worker-21] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 15:47:37,879 [Worker-21] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\user1\Documents\mstSentenceService\mstSentenceService\mst-sentence-service\src\test\resources
+2018-06-12 15:47:44,049 [Worker-20] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 15:47:44,050 [Worker-20] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2018-06-12 15:47:44,050 [Worker-20] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 15:47:44,055 [Worker-20] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\user1\Documents\mstSentenceService\mstSentenceService\mst-sentence-service\src\test\resources
+2018-06-12 15:47:49,810 [Worker-21] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 15:47:49,816 [Worker-21] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2018-06-12 15:47:49,821 [Worker-21] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 15:47:49,825 [Worker-21] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\user1\Documents\mstSentenceService\mstSentenceService\mst-sentence-service\src\test\resources
+2018-06-12 15:47:54,198 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 15:47:54,199 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2018-06-12 15:47:54,200 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 15:47:54,204 [Worker-1] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\user1\Documents\mstSentenceService\mstSentenceService\mst-sentence-service\src\test\resources
+2018-06-12 15:48:06,881 [Worker-2] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 15:48:06,886 [Worker-2] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2018-06-12 15:48:06,893 [Worker-2] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 15:48:06,898 [Worker-2] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\user1\Documents\mstSentenceService\mstSentenceService\mst-sentence-service\src\test\resources
+2018-06-12 15:52:43,258 [Worker-4] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 15:52:43,267 [Worker-4] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2018-06-12 15:52:43,271 [Worker-4] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 15:52:43,271 [Worker-4] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\user1\Documents\mstSentenceService\mstSentenceService\mst-sentence-service\src\test\resources
+2018-06-12 19:37:32,152 [Worker-150] INFO  o.e.m.c.i.p.ProjectConfigurationManager - Update started
+2018-06-12 19:37:33,091 [Worker-150] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.maven.ide.eclipse.wtp.WarLifecycleMapping lifecycle mapping for MavenProject: com.mst.services:mst-sentence-service:0.0.1-SNAPSHOT @ C:\Users\user1\Documents\mstSentenceService\mstSentenceService\mst-sentence-service\pom.xml.
+2018-06-12 19:37:35,282 [Worker-150] INFO  o.e.m.j.i.AbstractJavaProjectConfigurator - Adding source folder /mst-sentence-service/src/main/java
+2018-06-12 19:37:35,282 [Worker-150] INFO  o.e.m.j.i.AbstractJavaProjectConfigurator - Adding resource folder /mst-sentence-service/src/main/resources
+2018-06-12 19:37:35,283 [Worker-150] INFO  o.e.m.j.i.AbstractJavaProjectConfigurator - Adding source folder /mst-sentence-service/src/test/java
+2018-06-12 19:37:36,689 [Worker-150] INFO  o.e.m.w.i.f.ResourceFilteringBuildParticipant - Cleaning filtered folder for mst-sentence-service
+2018-06-12 19:37:36,694 [Worker-150] INFO  o.e.m.c.i.p.ProjectConfigurationManager - Update completed: 4 sec
+2018-06-12 19:37:37,996 [Worker-149] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 19:37:37,997 [Worker-149] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2018-06-12 19:37:37,999 [Worker-149] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 19:37:37,999 [Worker-149] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\user1\Documents\mstSentenceService\mstSentenceService\mst-sentence-service\src\test\resources
+2018-06-12 19:37:38,000 [Worker-149] INFO  o.e.m.w.i.f.ResourceFilteringBuildParticipant - Changed resources require a complete clean of filtered resources of mst-sentence-service
+2018-06-12 19:37:38,006 [Worker-149] INFO  o.e.m.w.i.f.ResourceFilteringBuildParticipant - Executing resource filtering for mst-sentence-service
+2018-06-12 19:37:38,019 [Worker-149] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 19:57:18,062 [Worker-164] INFO  o.e.m.c.i.p.ProjectConfigurationManager - Update started
+2018-06-12 19:57:18,573 [Worker-164] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.maven.ide.eclipse.wtp.WarLifecycleMapping lifecycle mapping for MavenProject: com.mst.services:mst-sentence-service:0.0.1-SNAPSHOT @ C:\Users\user1\Documents\mstSentenceService\mstSentenceService\mst-sentence-service\pom.xml.
+2018-06-12 19:57:20,494 [Worker-164] INFO  o.e.m.j.i.AbstractJavaProjectConfigurator - Adding source folder /mst-sentence-service/src/main/java
+2018-06-12 19:57:20,501 [Worker-164] INFO  o.e.m.j.i.AbstractJavaProjectConfigurator - Adding resource folder /mst-sentence-service/src/main/resources
+2018-06-12 19:57:20,508 [Worker-164] INFO  o.e.m.j.i.AbstractJavaProjectConfigurator - Adding source folder /mst-sentence-service/src/test/java
+2018-06-12 19:57:21,432 [Worker-164] INFO  o.e.m.w.i.f.ResourceFilteringBuildParticipant - Cleaning filtered folder for mst-sentence-service
+2018-06-12 19:57:21,442 [Worker-164] INFO  o.e.m.c.i.p.ProjectConfigurationManager - Update completed: 3 sec
+2018-06-12 19:57:22,595 [Worker-166] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 19:57:22,600 [Worker-166] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 0 resource
+2018-06-12 19:57:22,606 [Worker-166] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
+2018-06-12 19:57:22,610 [Worker-166] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\Users\user1\Documents\mstSentenceService\mstSentenceService\mst-sentence-service\src\test\resources
+2018-06-12 19:57:22,611 [Worker-166] INFO  o.e.m.w.i.f.ResourceFilteringBuildParticipant - Changed resources require a complete clean of filtered resources of mst-sentence-service
+2018-06-12 19:57:22,611 [Worker-166] INFO  o.e.m.w.i.f.ResourceFilteringBuildParticipant - Executing resource filtering for mst-sentence-service
+2018-06-12 19:57:22,614 [Worker-166] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.

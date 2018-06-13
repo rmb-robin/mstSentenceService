@@ -15,7 +15,6 @@ import com.mst.model.raw.RawReportFile;
 import com.mst.model.requests.RejectedReport;
 import com.mst.model.requests.SentenceTextRequest;
 import com.mst.sentenceprocessing.interfaces.RawReportService;
-import com.mst.sentenceprocessing.interfaces.RecommendationService;
 import com.mst.sentenceprocessing.interfaces.ReportsService;
 import com.mst.sentenceprocessing.interfaces.SentenceService;
 import com.mst.sentenceprocessing.models.RawFileSaveResult;
@@ -27,6 +26,9 @@ import com.mst.sentenceprocessing.services.SentenceServiceImpl;
 
 @Path("rawreport")
 public class RawReportController {
+    private RawReportService rawReportService = new RawReportServiceImpl();
+    private ReportsService reportsService = new ReportsServiceImpl();
+    private SentenceService sentenceService = new SentenceServiceImpl();
 
 	private RawReportService service = new RawReportServiceImpl();
 	private ReportsService reportsService = new ReportsServiceImpl();
