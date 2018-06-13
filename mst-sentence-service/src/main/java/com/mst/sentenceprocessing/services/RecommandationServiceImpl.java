@@ -35,11 +35,11 @@ import com.mst.sentenceprocessing.RecommendationEdgesVerificationProcesser;
 
 import com.mst.sentenceprocessing.SentenceDiscoveryProcessorImpl;
 import com.mst.sentenceprocessing.dao.SentenceProcessingDbMetaDataInputFactory;
-import com.mst.sentenceprocessing.interfaces.RecommandationService;
+import com.mst.sentenceprocessing.interfaces.RecommendationService;
 import com.mst.services.mst_sentence_service.SentenceServiceMongoDatastoreProvider;
 import com.mst.util.RecommandedTokenRelationshipUtil;
 
-public class RecommandationServiceImpl implements RecommandationService {
+public class RecommandationServiceImpl implements RecommendationService {
 
 	private SentenceDiscoveryProcessor sentenceDiscoveryProcessor; 
 	private SentenceDiscoveryDao dao; 

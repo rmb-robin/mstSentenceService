@@ -21,7 +21,7 @@ import com.mst.sentenceprocessing.interfaces.SentenceService;
 import com.mst.sentenceprocessing.models.RawFileSaveResult;
 import com.mst.sentenceprocessing.models.TextResponse;
 import com.mst.sentenceprocessing.services.RawReportServiceImpl;
-import com.mst.sentenceprocessing.services.RecommendationServiceImpl;
+import com.mst.sentenceprocessing.services.RecommandationServiceImpl;
 import com.mst.sentenceprocessing.services.ReportsServiceImpl;
 import com.mst.sentenceprocessing.services.SentenceServiceImpl;
 
@@ -30,7 +30,7 @@ public class RawReportController {
 
 	private RawReportService service = new RawReportServiceImpl();
 	private ReportsService reportsService = new ReportsServiceImpl();
-	private RecommendationService recommendationService = new RecommendationServiceImpl();
+	private RecommendationService recommendationService = new RecommandationServiceImpl();
 	private SentenceService sentenceService = new SentenceServiceImpl(); 
 	
 	
