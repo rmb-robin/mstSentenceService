@@ -88,12 +88,12 @@ public class RawReportServiceImpl implements RawReportService {
 		return result;
 	}
 	
-
-	public ParseHl7Result getSetentenceTextRequestFromRaw(HL7Details detail,RawReportFile file, AllHl7Elements allElements) throws HL7Exception{
+	public ParseHl7Result getSentenceTextRequestFromRaw(HL7Details detail, RawReportFile file,AllHl7Elements allElements) throws HL7Exception {
 		HL7Parser parser = new HL7Parser();
 		return parser.run(detail,file.getContent(),file.getOrgName(), allElements);
 	}
-
+	
+	
 	@Override
 	public String saveParsed(String rawFileId, SentenceTextRequest request) {
 		return hl7ParsedRequstDao.save(convertTOHl7Parsed(rawFileId,request));
@@ -110,4 +110,7 @@ public class RawReportServiceImpl implements RawReportService {
 		result.setProcessedDate(LocalDate.now());
 		return result;
 	}
+
+	
+	
 }

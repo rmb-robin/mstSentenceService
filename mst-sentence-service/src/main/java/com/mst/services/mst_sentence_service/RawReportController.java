@@ -20,9 +20,9 @@ import com.mst.sentenceprocessing.interfaces.SentenceService;
 import com.mst.sentenceprocessing.models.RawFileSaveResult;
 import com.mst.sentenceprocessing.models.TextResponse;
 import com.mst.sentenceprocessing.services.RawReportServiceImpl;
-import com.mst.sentenceprocessing.services.RecommandationServiceImpl;
 import com.mst.sentenceprocessing.services.ReportsServiceImpl;
 import com.mst.sentenceprocessing.services.SentenceServiceImpl;
+
 
 @Path("rawreport")
 public class RawReportController {
@@ -30,12 +30,7 @@ public class RawReportController {
     private ReportsService reportsService = new ReportsServiceImpl();
     private SentenceService sentenceService = new SentenceServiceImpl();
 
-	private RawReportService service = new RawReportServiceImpl();
-	private ReportsService reportsService = new ReportsServiceImpl();
-	private RecommendationService recommendationService = new RecommandationServiceImpl();
-	private SentenceService sentenceService = new SentenceServiceImpl(); 
-	
-	
+
 	private static HashSet<String> reprocessLocations = populateReprocessLocations();
 	
 	private static HashSet<String> populateReprocessLocations(){
@@ -78,7 +73,7 @@ public class RawReportController {
 			
 			AllHl7Elements allHl7Elements= reportsService.getAllHl7Elements();
 			
-			ParseHl7Result parsedResult = service.getSetentenceTextRequestFromRaw(details, file,allHl7Elements);
+			ParseHl7Result parsedResult = rawReportService.getSentenceTextRequestFromRaw(details, file,allHl7Elements);
 			SentenceTextRequest request= parsedResult.getSentenceTextRequest();
 	
 			if(!needsreprocessOnLocation(request))
@@ -87,14 +82,14 @@ public class RawReportController {
 			
 			request.getDiscreteData().setOrganizationId(file.getOrgId());
 			request.getDiscreteData().setAllAvailableFields(parsedResult.getAllFields());
-			RawFileSaveResult rawFileSaveResult = service.save(request,file);
+			RawFileSaveResult rawFileSaveResult = rawReportService.save(request,file);
 			String fileId = rawFileSaveResult.getFileId();
 			
 			if(rawFileSaveResult.isDuplicate()) 
 				return Response.status(200).entity("Report already existed.").build();
 			
 			request.getDiscreteData().setRawFileId(fileId);
-			String parsedId = service.saveParsed(fileId,request);
+			String parsedId = rawReportService.saveParsed(fileId,request);
 			request.getDiscreteData().setParseReportId(parsedId);
 			
 			if(!parsedResult.getMissingFields().isEmpty()) {
@@ -133,20 +128,20 @@ public class RawReportController {
 			
 			AllHl7Elements allHl7Elements= reportsService.getAllHl7Elements();
 			
-			ParseHl7Result parsedResult = service.getSetentenceTextRequestFromRaw(details, file,allHl7Elements);
+			ParseHl7Result parsedResult = rawReportService.getSentenceTextRequestFromRaw(details, file,allHl7Elements);
 			SentenceTextRequest request= parsedResult.getSentenceTextRequest();
 	
 			
 			request.getDiscreteData().setOrganizationId(file.getOrgId());
 			request.getDiscreteData().setAllAvailableFields(parsedResult.getAllFields());
-			RawFileSaveResult rawFileSaveResult = service.save(request,file);
+			RawFileSaveResult rawFileSaveResult = rawReportService.save(request,file);
 			String fileId = rawFileSaveResult.getFileId();
 			
 			if(rawFileSaveResult.isDuplicate()) 
 				return Response.status(200).entity("Report already existed.").build();
 			
 			request.getDiscreteData().setRawFileId(fileId);
-			String parsedId = service.saveParsed(fileId,request);
+			String parsedId = rawReportService.saveParsed(fileId,request);
 			request.getDiscreteData().setParseReportId(parsedId);
 			
 			if(!parsedResult.getMissingFields().isEmpty()) {

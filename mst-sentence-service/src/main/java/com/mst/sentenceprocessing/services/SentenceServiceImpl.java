@@ -314,5 +314,11 @@ public class SentenceServiceImpl implements SentenceService,PreDestroy {
 		return result;
 	}
 
+	@Override
+	public void RemoveNonDisplayEdges(List<SentenceQueryResult> queryResults) {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 }
