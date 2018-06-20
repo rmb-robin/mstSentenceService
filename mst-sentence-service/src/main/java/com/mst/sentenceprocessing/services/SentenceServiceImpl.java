@@ -112,7 +112,7 @@ public class SentenceServiceImpl implements SentenceService, PreDestroy {
     public void saveSentences(List<Sentence> sentences, DiscreteData discreteData, SentenceProcessingFailures sentenceProcessingFailures, boolean isReprocess, String reprocessId, String resultType) {
         List<SentenceDb> documents = new ArrayList<>();
         for (Sentence sentence : sentences) {
-            SentenceDb document = SentenceConverter.convertToDocument(sentence);
+            SentenceDb document = SentenceConverter.convertToSentenceDb(sentence, false);
             if (isReprocess) {
                 document.setId(new ObjectId(sentence.getId()));
                 document.setReprocessId(reprocessId);

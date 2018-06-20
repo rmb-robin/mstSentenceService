@@ -30,7 +30,7 @@ import com.mst.model.recommandation.SentenceDiscovery;
 import com.mst.model.requests.SentenceTextRequest;
 import com.mst.model.sentenceProcessing.SentenceProcessingMetaDataInput;
 import com.mst.model.sentenceProcessing.TokenRelationship;
-import com.mst.sentenceprocessing.RecommendationEdgesVerificationProcesser;
+import com.mst.sentenceprocessing.RecommendationEdgesVerificationProcessor;
 import com.mst.sentenceprocessing.RecommendedNounPhraseProcessorImpl;
 import com.mst.sentenceprocessing.SentenceDiscoveryProcessorImpl;
 import com.mst.sentenceprocessing.dao.SentenceProcessingDbMetaDataInputFactory;
@@ -43,7 +43,7 @@ public class RecommendationServiceImpl implements RecommendationService {
 	private SentenceDiscoveryDao dao; 
 	private SentenceProcessingMetaDataInputFactory sentenceProcessingDbMetaDataInputFactory;
 	private RecommendedTokenRelationshipDao recommendedTokenRelationshipDao;
-	private RecommendationEdgesVerificationProcesser recommendationEdgesVerificationProcesser; 
+	private RecommendationEdgesVerificationProcessor recommendationEdgesVerificationProcesser;
 	private RecommendedTokenRelationshipCacheManager cacheManger; 
 	private RecommendedTokenRelationshipAutocompleteQuery recommendedTokenRelationshipAutocompleteQuery;
 	private FriendOfFriendService friendOfFriendService;
@@ -58,7 +58,7 @@ public class RecommendationServiceImpl implements RecommendationService {
 		recommendedTokenRelationshipDao = new RecommendedTokenRelationshipDaoImpl();
 		recommendedTokenRelationshipDao.setMongoDatastoreProvider(mongoProvider);
 		sentenceProcessingDbMetaDataInputFactory = new SentenceProcessingDbMetaDataInputFactory(mongoProvider);
-		recommendationEdgesVerificationProcesser =new RecommendationEdgesVerificationProcesser();
+		recommendationEdgesVerificationProcesser =new RecommendationEdgesVerificationProcessor();
 		cacheManger = new RecommendedTokenRelationshipCacheManagerImpl();
 		recommendedTokenRelationshipAutocompleteQuery = new RecommendedTokenRelationshipAutocompleteQueryImpl();
 		friendOfFriendService = new FriendOfFriendServiceImpl();
@@ -75,7 +75,7 @@ public class RecommendationServiceImpl implements RecommendationService {
 		if(input == null)
 			input = sentenceProcessingDbMetaDataInputFactory.create();
 		List<SentenceDiscovery> sentenceDiscoveries =  this.createSentenceDiscovery(request,input);
-		List<RecommendedTokenRelationship> existing = recommendedTokenRelationshipDao.queryByKey(getkeys(sentenceDiscoveries));
+		List<RecommendedTokenRelationship> existing = recommendedTokenRelationshipDao.queryByKey(getKeys(sentenceDiscoveries));
 		this.saveRecommandedTokenRelationships(sentenceDiscoveries,existing,input);
 		this.processingVerification(sentenceDiscoveries,existing,request.getDiscreteData());
 	}
@@ -140,7 +140,7 @@ public class RecommendationServiceImpl implements RecommendationService {
 		dao.saveSentenceDiscoveries(sentenceDiscoveries,discreteData,null);
 		updateVerifiedUniqueIds(verified);
 		recommendedTokenRelationshipDao.saveCollection(verified);
-		loadRecommandedTokenRelationshipIntoCach(verified);
+		loadRecommendedTokenRelationshipIntoCach(verified);
 	}
 
 	private void updateVerifiedUniqueIds(List<RecommendedTokenRelationship> verified){
@@ -169,7 +169,7 @@ public class RecommendationServiceImpl implements RecommendationService {
 		return result;
 	}
 
-	private HashSet<String> getkeys(List<SentenceDiscovery> sentenceDiscoveries){
+	private HashSet<String> getKeys(List<SentenceDiscovery> sentenceDiscoveries){
 		HashSet<String> result = new HashSet<>();
 		for(SentenceDiscovery sentenceDiscovery: sentenceDiscoveries){
 			result.addAll(RecommandedTokenRelationshipUtil.getKeyForSentenceDiscovery(sentenceDiscovery));
@@ -178,12 +178,12 @@ public class RecommendationServiceImpl implements RecommendationService {
 	}
 
 	public void reloadCache() {
-		List<RecommendedTokenRelationship> recommandedTokenRelationships =  this.recommendedTokenRelationshipDao.getVerified();
-		loadRecommandedTokenRelationshipIntoCach(recommandedTokenRelationships);
+		List<RecommendedTokenRelationship> recommendedTokenRelationships = recommendedTokenRelationshipDao.getVerified();
+		loadRecommendedTokenRelationshipIntoCach(recommendedTokenRelationships);
 	}
 
-	private void loadRecommandedTokenRelationshipIntoCach(List<RecommendedTokenRelationship> recommandedTokenRelationships){
-		Map<String, List<RecommendedTokenRelationship>> uniqueByToken = RecommandedTokenRelationshipUtil.getMapByDistinctToFrom(recommandedTokenRelationships);
+	private void loadRecommendedTokenRelationshipIntoCach(List<RecommendedTokenRelationship> recommendedTokenRelationships){
+		Map<String, List<RecommendedTokenRelationship>> uniqueByToken = RecommandedTokenRelationshipUtil.getMapByDistinctToFrom(recommendedTokenRelationships);
 		for(Entry<String, List<RecommendedTokenRelationship>> entry: uniqueByToken.entrySet()){
 			cacheManger.reload(entry.getKey(), entry.getValue());
 		}
