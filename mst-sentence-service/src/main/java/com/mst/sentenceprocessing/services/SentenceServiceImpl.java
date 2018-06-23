@@ -46,8 +46,6 @@ import com.mst.sentenceprocessing.models.Edges;
 import com.mst.sentenceprocessing.models.SaveSentenceTextResponse;
 import com.mst.services.mst_sentence_service.RequestsMongoDatastoreProvider;
 import com.mst.services.mst_sentence_service.SentenceServiceMongoDatastoreProvider;
-import test.SaveSentenceQueryInput;
-import test.SaveSentenceTextRequest;
 
 import static com.mst.model.businessRule.BusinessRule.RuleType.MODIFY_SENTENCE_QUERY_INPUT;
 import static com.mst.model.businessRule.BusinessRule.RuleType.MODIFY_SENTENCE_QUERY_RESULT;
@@ -90,7 +88,6 @@ public class SentenceServiceImpl implements SentenceService, PreDestroy {
             throw new Exception("Missing OrgId");
         if (input.getIsNotAndAll())
             input = new NotAndAllRequestFactoryImpl().create(input);
-        new SaveSentenceQueryInput().process(input);
         List<BusinessRule> modifySentenceQueryInput = businessRuleDao.get(input.getOrganizationId(), MODIFY_SENTENCE_QUERY_INPUT);
         if (modifySentenceQueryInput != null)
             new BusinessRuleFilterImpl().modifySentenceQueryInput(input, modifySentenceQueryInput);
@@ -162,7 +159,6 @@ public class SentenceServiceImpl implements SentenceService, PreDestroy {
     @Override
     public SentenceProcessingResult createSentences(SentenceTextRequest request) throws Exception {
         controller.setMetadata(getSentenceProcessingMetadata());
-        new SaveSentenceTextRequest().process(request);
         return controller.processText(request);
     }
 
